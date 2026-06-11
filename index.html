@@ -186,6 +186,8 @@
       align-items: flex-start;
       gap: 10px;
       margin-bottom: 12px;
+      opacity: 0;
+      animation: bubbleIn 0.35s ease forwards;
     }
 
     .dialogue-wrap.right {
@@ -274,6 +276,10 @@
       font-weight: bold;
     }
 
+    .content-anim {
+      animation: slideFadeIn 0.35s ease;
+    }
+
     .option-btn {
       width: 100%;
       padding: 14px;
@@ -283,7 +289,7 @@
       background: #fff;
       cursor: pointer;
       font-size: 17px;
-      transition: 0.18s ease;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
       text-align: left;
       display: flex;
       align-items: flex-start;
@@ -310,6 +316,7 @@
     .option-selected {
       border-color: #005fcc;
       background: #edf5ff;
+      animation: selectedPulse 0.22s ease;
     }
 
     .option-correct {
@@ -337,6 +344,7 @@
       color: white;
       box-shadow: 4px 4px 0 var(--ink);
       font-weight: bold;
+      transition: transform 0.18s ease;
     }
 
     .action-btn:hover {
@@ -377,22 +385,55 @@
       display: block;
     }
 
+    .result-pop {
+      animation: popIn 0.30s ease;
+    }
+
+    .result-shake {
+      animation: shakeX 0.32s ease;
+    }
+
+    .final-enter {
+      animation: finalEnter 0.45s ease;
+    }
+
     .reminder {
       margin-top: 8px;
       font-weight: bold;
     }
 
+    /* 強化版榮耀 Badge */
     .level-badge {
-      display: inline-block;
-      margin-top: 8px;
-      margin-bottom: 12px;
-      background: #fff;
-      color: var(--ink);
-      border: 3px solid var(--ink);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      margin-bottom: 16px;
+      padding: 14px 20px;
+      font-weight: 900;
+      font-size: 20px;
+      line-height: 1.2;
       border-radius: 999px;
-      padding: 8px 14px;
-      font-weight: bold;
-      box-shadow: 3px 3px 0 var(--ink);
+      border: 4px solid var(--ink);
+      background:
+        linear-gradient(135deg, #fffef8 0%, #ffe7a8 35%, #ffd54f 100%);
+      color: var(--ink);
+      box-shadow:
+        0 0 0 4px #fff,
+        0 0 0 8px var(--ink),
+        0 10px 0 var(--ink),
+        0 0 24px rgba(255, 213, 79, 0.35);
+      text-shadow: 1px 1px 0 rgba(255,255,255,0.7);
+      animation: badgeRise 0.45s ease;
+    }
+
+    .level-badge .level-icon {
+      font-size: 26px;
+      line-height: 1;
+    }
+
+    .level-badge .level-text {
+      display: inline-block;
     }
 
     .share-box {
@@ -430,6 +471,7 @@
       cursor: pointer;
       font-weight: bold;
       box-shadow: 3px 3px 0 var(--ink);
+      transition: transform 0.18s ease;
     }
 
     .share-btn:hover {
@@ -442,6 +484,11 @@
       font-weight: bold;
       color: #00703c;
       display: none;
+    }
+
+    .copy-msg.show {
+      display: block;
+      animation: fadePop 0.3s ease;
     }
 
     .controls {
@@ -461,6 +508,7 @@
       font-size: 16px;
       font-weight: bold;
       box-shadow: 4px 4px 0 var(--ink);
+      transition: transform 0.18s ease;
     }
 
     .nav-btn.primary {
@@ -470,6 +518,10 @@
 
     .nav-btn.primary:hover {
       transform: translate(-1px, -1px);
+    }
+
+    .nav-btn.cta-glow {
+      animation: ctaPulse 1.2s infinite;
     }
 
     .summary {
@@ -490,7 +542,7 @@
       font-weight: bold;
     }
 
-    /* 完成頁模式：隱藏答題時期內容，直接聚焦結果 */
+    /* 完成頁模式 */
     .card.final-mode .topbar,
     .card.final-mode .hero-subtitle,
     .card.final-mode .intro,
@@ -513,6 +565,7 @@
       margin-top: 4px;
       margin-bottom: 12px;
       font-size: 28px;
+      animation: slideFadeIn 0.28s ease;
     }
 
     .card.final-mode #finalResult {
@@ -530,6 +583,98 @@
 
     .card.final-mode .nav-btn {
       min-width: 180px;
+    }
+
+    @keyframes slideFadeIn {
+      from {
+        opacity: 0;
+        transform: translateX(14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes popIn {
+      0% {
+        transform: scale(0.96);
+        opacity: 0.7;
+      }
+      70% {
+        transform: scale(1.03);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    @keyframes shakeX {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-4px); }
+      40% { transform: translateX(4px); }
+      60% { transform: translateX(-3px); }
+      80% { transform: translateX(3px); }
+    }
+
+    @keyframes finalEnter {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadePop {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes bubbleIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes selectedPulse {
+      0% { transform: scale(0.98); }
+      70% { transform: scale(1.01); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes ctaPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes badgeRise {
+      0% {
+        opacity: 0;
+        transform: scale(0.92) translateY(8px);
+      }
+      70% {
+        opacity: 1;
+        transform: scale(1.04) translateY(0);
+      }
+      100% {
+        transform: scale(1) translateY(0);
+      }
     }
 
     @media (max-width: 640px) {
@@ -573,6 +718,15 @@
         width: 100%;
         min-width: 0;
       }
+
+      .level-badge {
+        font-size: 17px;
+        padding: 12px 16px;
+      }
+
+      .level-badge .level-icon {
+        font-size: 22px;
+      }
     }
   </style>
 </head>
@@ -597,26 +751,28 @@
     <h1 id="siteTitle"></h1>
     <div class="intro" id="intro"></div>
 
-    <div class="meta" id="meta"></div>
-    <h2 class="question-title" id="title"></h2>
+    <div id="questionArea">
+      <div class="meta" id="meta"></div>
+      <h2 class="question-title" id="title"></h2>
 
-    <div id="storyCard" class="story-card">
-      <div class="story-label" id="storyLabel"></div>
-      <div class="story-title" id="storyTitle"></div>
-      <div id="storyContent"></div>
+      <div id="storyCard" class="story-card">
+        <div class="story-label" id="storyLabel"></div>
+        <div class="story-title" id="storyTitle"></div>
+        <div id="storyContent"></div>
+      </div>
+
+      <div class="scenario" id="question"></div>
+      <div class="question-type" id="questionType"></div>
+      <div class="question-hint" id="questionHint"></div>
+
+      <div id="answers"></div>
+
+      <div class="answer-action" id="answerAction" style="display:none;">
+        <button id="checkBtn" class="action-btn"></button>
+      </div>
+
+      <div id="result" class="result"></div>
     </div>
-
-    <div class="scenario" id="question"></div>
-    <div class="question-type" id="questionType"></div>
-    <div class="question-hint" id="questionHint"></div>
-
-    <div id="answers"></div>
-
-    <div class="answer-action" id="answerAction" style="display:none;">
-      <button id="checkBtn" class="action-btn"></button>
-    </div>
-
-    <div id="result" class="result"></div>
 
     <div class="controls">
       <button class="nav-btn primary" id="nextBtn"></button>
@@ -723,9 +879,18 @@
       box.style.display = "none";
     }
 
+    function triggerAnimation(el, className) {
+      if (!el) return;
+      el.classList.remove(className);
+      void el.offsetWidth;
+      el.classList.add(className);
+    }
+
     function showResult(question, selectedIndexes) {
       const resultBox = document.getElementById("result");
       const correct = isAnswerCorrect(question, selectedIndexes);
+
+      resultBox.classList.remove("result-pop", "result-shake");
 
       if (correct) {
         resultBox.className = "result correct";
@@ -734,6 +899,8 @@
           ${question.explanation[currentLang]}
           <div class="reminder">${getUIText("reminderLabel")}：${question.reminder[currentLang]}</div>
         `;
+        resultBox.style.display = "block";
+        triggerAnimation(resultBox, "result-pop");
       } else {
         resultBox.className = "result wrong";
         resultBox.innerHTML = `
@@ -741,9 +908,9 @@
           ${question.explanation[currentLang]}
           <div class="reminder">${getUIText("reminderLabel")}：${question.reminder[currentLang]}</div>
         `;
+        resultBox.style.display = "block";
+        triggerAnimation(resultBox, "result-shake");
       }
-
-      resultBox.style.display = "block";
     }
 
     function getLevelKey() {
@@ -757,6 +924,20 @@
 
     function getEncouragementMessage() {
       return quizData.messages[getLevelKey()][currentLang];
+    }
+
+    function buildLevelBadge(levelKey) {
+      const levelText = getUIText("levels")[levelKey] || "";
+      const parts = levelText.trim().split(" ");
+      const icon = parts[0] || "🏅";
+      const text = parts.slice(1).join(" ") || levelText;
+
+      return `
+        <div class="level-badge">
+          <span class="level-icon">${icon}</span>
+          <span class="level-text">${getUIText("levelLabel")}：${text}</span>
+        </div>
+      `;
     }
 
     function renderShareSection() {
@@ -795,19 +976,20 @@
       const score = getScore();
       const scorePercent = Math.round((score / total) * 100);
       const levelKey = getLevelKey();
-      const levelName = getUIText("levels")[levelKey];
 
       box.className = "result info";
       box.innerHTML = `
         <strong>${getUIText("resultTitle")}</strong><br>
         ${getUIText("scoreLabel")}：${score} / ${total} (${scorePercent}%)<br>
-        <div class="level-badge">${getUIText("levelLabel")}：${levelName}</div>
+        ${buildLevelBadge(levelKey)}
         <div>${getEncouragementMessage()}</div>
         ${renderShareSection()}
       `;
       box.style.display = "block";
+      triggerAnimation(box, "final-enter");
 
       document.getElementById("nextBtn").innerText = getUIText("restart");
+      document.getElementById("nextBtn").classList.remove("cta-glow");
       updateSummary();
     }
 
@@ -826,9 +1008,11 @@
       navigator.clipboard.writeText(url).then(() => {
         const msg = document.getElementById("copyMsg");
         if (msg) {
-          msg.style.display = "block";
+          msg.classList.remove("show");
+          void msg.offsetWidth;
+          msg.classList.add("show");
           setTimeout(() => {
-            msg.style.display = "none";
+            msg.classList.remove("show");
           }, 2500);
         }
       }).catch(() => {
@@ -855,9 +1039,10 @@
         storyContentBox.innerHTML = "";
 
         if (Array.isArray(story.dialogues)) {
-          story.dialogues.forEach(item => {
+          story.dialogues.forEach((item, idx) => {
             const wrap = document.createElement("div");
             wrap.className = `dialogue-wrap ${item.side === "right" ? "right" : "left"}`;
+            wrap.style.animationDelay = `${idx * 0.08}s`;
 
             const avatar = document.createElement("div");
             avatar.className = "avatar";
@@ -897,6 +1082,14 @@
         storyCard.style.display = "none";
         questionBox.innerHTML = question.scenario[currentLang];
       }
+    }
+
+    function animateQuestionArea() {
+      const area = document.getElementById("questionArea");
+      if (!area) return;
+      area.classList.remove("content-anim");
+      void area.offsetWidth;
+      area.classList.add("content-anim");
     }
 
     function renderQuestion() {
@@ -972,11 +1165,17 @@
 
       updateSummary();
 
+      const nextBtn = document.getElementById("nextBtn");
+      nextBtn.classList.remove("cta-glow");
+
       if (allAnswered() && current === quizData.questions.length - 1 && alreadySubmitted) {
-        document.getElementById("nextBtn").innerText = getUIText("finish");
+        nextBtn.innerText = getUIText("finish");
+        nextBtn.classList.add("cta-glow");
       } else {
-        document.getElementById("nextBtn").innerText = getUIText("next");
+        nextBtn.innerText = getUIText("next");
       }
+
+      animateQuestionArea();
     }
 
     function selectOption(index) {
@@ -1021,6 +1220,7 @@
       current = 0;
       showingFinal = false;
       document.getElementById("quizCard").classList.remove("final-mode");
+      document.getElementById("nextBtn").classList.remove("cta-glow");
       renderQuestion();
     }
 
