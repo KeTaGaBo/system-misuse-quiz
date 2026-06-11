@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "category": "查看資料",
+    "title": "只是「看一看」，算不算問題？",
+    "scenario": "只係查看朋友資料，唔外傳，可以嗎？",
+    "options": [
+      { "text": "可以", "correct": false },
+      { "text": "不可以", "correct": true }
+    ],
+    "explanation": "單純查看已可能違規。即使無下載或外傳，只要無工作需要，查閱本身已可能構成不當使用。",
+    "reminder": "查看本身，就已經是使用資料。"
+  },
+  {
+    "id": 2,
+    "category": "帳號使用",
+    "title": "借同事帳號幫手查資料，可以嗎？",
+    "scenario": "用同事帳號幫手查資料，可以嗎？",
+    "options": [
+      { "text": "可以", "correct": false },
+      { "text": "不可以", "correct": true }
+    ],
+    "explanation": "借帳號 = 未授權存取。帳號代表身份與責任，借用帳號會破壞追蹤紀錄，亦可能帶來法律風險。",
+    "reminder": "借帳號 = 借身份 = 借風險。"
+  },
+  {
+    "id": 3,
+    "category": "權限觀念",
+    "title": "系統見到，就代表可以用？",
+    "scenario": "如果系統本身顯示到資料，是否代表你可以使用？",
+    "options": [
+      { "text": "可以", "correct": false },
+      { "text": "不一定", "correct": true }
+    ],
+    "explanation": "有權限 ≠ 可任用。是否可以使用資料，取決於工作需要與授權目的。",
+    "reminder": "看得到，不等於獲准使用。"
+  }
+]
