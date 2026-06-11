@@ -940,6 +940,23 @@
       `;
     }
 
+    function refreshOptionSelectionUI(question, state) {
+      const buttons = document.querySelectorAll("#answers .option-btn");
+    
+      buttons.forEach((btn, i) => {
+        btn.classList.remove("option-selected");
+    
+        if (state.selected.includes(i)) {
+          btn.classList.add("option-selected");
+        }
+      });
+    
+      if (question.type === "multiple" && !state.submitted) {
+        document.getElementById("answerAction").style.display = "block";
+        document.getElementById("checkBtn").disabled = state.selected.length === 0;
+      }
+    }
+    
     function renderShareSection() {
       return `
         <div class="share-box">
@@ -1181,25 +1198,29 @@
     function selectOption(index) {
       const question = quizData.questions[current];
       const state = getQuestionState(question.id);
-
+    
       if (state.submitted) return;
-
+    
+      // 單選：按下即提交，所以保留完整 render
       if (question.type === "single") {
         state.selected = [index];
         state.submitted = true;
         renderQuestion();
         return;
       }
-
+    
+      // 多選：只更新選中狀態，不重畫整題
       if (question.type === "multiple") {
         if (state.selected.includes(index)) {
           state.selected = state.selected.filter(i => i !== index);
         } else {
           state.selected.push(index);
         }
-        renderQuestion();
+    
+        refreshOptionSelectionUI(question, state);
       }
     }
+
 
     function submitMultipleAnswer() {
       const question = quizData.questions[current];
