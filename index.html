@@ -1,102 +1,295 @@
 <!DOCTYPE html>
 <html lang="zh-HK">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>你以為冇問題？其實可能犯法</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>你以為冇問題？其實可能犯法</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+      color: #222;
+    }
 
-<style>
-body {
-  font-family: Arial;
-  background:#f5f5f5;
-  padding:20px;
-}
-.card {
-  background:white;
-  padding:20px;
-  border-radius:12px;
-  max-width:500px;
-  margin:auto;
-}
-button {
-  width:100%;
-  padding:10px;
-  margin:5px 0;
-  border-radius:8px;
-  border:1px solid #ccc;
-  cursor:pointer;
-}
-.correct { background:#d4edda;}
-.wrong { background:#f8d7da;}
-</style>
+    .card {
+      background: white;
+      padding: 28px;
+      border-radius: 16px;
+      max-width: 720px;
+      margin: 30px auto;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+    }
 
+    .badge {
+      display: inline-block;
+      background: #fff3cd;
+      color: #856404;
+      font-size: 14px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+      font-weight: bold;
+    }
+
+    h1 {
+      margin: 0 0 12px 0;
+      font-size: 34px;
+      line-height: 1.2;
+    }
+
+    .intro {
+      font-size: 16px;
+      line-height: 1.7;
+      color: #555;
+      margin-bottom: 28px;
+    }
+
+    .meta {
+      font-size: 14px;
+      color: #777;
+      margin-bottom: 8px;
+    }
+
+    .question-title {
+      font-size: 26px;
+      margin: 0 0 10px 0;
+    }
+
+    .scenario {
+      font-size: 20px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .option-btn {
+      width: 100%;
+      padding: 14px;
+      margin: 8px 0;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      background: white;
+      cursor: pointer;
+      font-size: 18px;
+      transition: 0.2s ease;
+    }
+
+    .option-btn:hover {
+      background: #f3f3f3;
+    }
+
+    .result {
+      margin-top: 22px;
+      padding: 16px;
+      border-radius: 10px;
+      line-height: 1.8;
+      font-size: 16px;
+    }
+
+    .correct {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #b7dfbf;
+    }
+
+    .wrong {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #efb5ba;
+    }
+
+    .reminder {
+      margin-top: 8px;
+      font-weight: bold;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      flex: 1;
+      min-width: 120px;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .nav-btn.primary {
+      background: #0078d4;
+      color: white;
+    }
+
+    .nav-btn.primary:hover {
+      background: #106ebe;
+    }
+
+    .nav-btn.secondary {
+      background: #eaeaea;
+      color: #333;
+    }
+
+    .nav-btn.secondary:hover {
+      background: #dcdcdc;
+    }
+
+    .summary {
+      margin-top: 24px;
+      font-size: 15px;
+      color: #666;
+      text-align: right;
+    }
+
+    .footer-note {
+      margin-top: 24px;
+      font-size: 14px;
+      color: #666;
+      text-align: center;
+      border-top: 1px solid #eee;
+      padding-top: 16px;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 28px;
+      }
+
+      .question-title {
+        font-size: 22px;
+      }
+
+      .scenario {
+        font-size: 18px;
+      }
+
+      .option-btn {
+        font-size: 16px;
+      }
+    }
+  </style>
 </head>
-
 <body>
+  <div class="card">
+    <div class="badge">真實情境改編</div>
 
-<div class="card">
-<h2>你以為冇問題？其實可能犯法</h2>
+    <h1>你以為冇問題？其實可能犯法</h1>
 
-<p id="question"></p>
+    <div class="intro">
+      以下每題都來自真實工作情境。<br>
+      有些行為看似「無傷大雅」，但其實可能已經涉及違規甚至犯法。<br>
+      試試你的判斷，看看你能答對幾多題。
+    </div>
 
-<div id="answers"></div>
+    <div class="meta" id="meta"></div>
+    <h2 class="question-title" id="title"></h2>
+    <div class="scenario" id="question"></div>
 
-<p id="result"></p>
+    <div id="answers"></div>
 
-<button onclick="next()">下一題</button>
-</div>
+    <div id="result"></div>
 
-<script>
+    <div class="controls">
+      <button class="nav-btn secondary" onclick="prevQuestion()">上一題</button>
+      <button class="nav-btn primary" onclick="nextQuestion()">下一題</button>
+    </div>
 
-let q=0;
+    <div class="summary" id="summary"></div>
 
-const data=[
-{
-q:"只係查看朋友資料，唔外傳，可以嗎？",
-a:[
-{text:"可以",c:false},
-{text:"不可以",c:true}
-],
-exp:"單純查看已可能違規"
-},
-{
-q:"用同事帳號幫手？",
-a:[
-{text:"可以",c:false},
-{text:"不可以",c:true}
-],
-exp:"借帳號 = 未授權存取"
-}
-];
+    <div class="footer-note">
+      保護資料 = 保護自己
+    </div>
+  </div>
 
-function load(){
-document.getElementById("result").innerHTML="";
-document.getElementById("question").innerHTML=data[q].q;
+  <script>
+    let questions = [];
+    let current = 0;
+    let answered = {};
+    let score = 0;
 
-let html="";
-data[q].a.forEach((opt,i)=>{
-html+=`<button onclick="check(${i})">${opt.text}</button>`;
-});
-document.getElementById("answers").innerHTML=html;
-}
+    async function loadQuestions() {
+      try {
+        const response = await fetch('questions.json');
+        questions = await response.json();
+        renderQuestion();
+      } catch (error) {
+        document.getElementById('question').innerHTML = '❌ 載入題目失敗，請稍後再試。';
+        console.error(error);
+      }
+    }
 
-function check(i){
-let res=data[q].a[i].c;
-let msg=res?"✅ 正確":"❌ 錯誤";
+    function renderQuestion() {
+      const q = questions[current];
+      if (!q) return;
 
-document.getElementById("result").innerHTML=
-msg+"<br>"+data[q].exp;
-}
+      document.getElementById('meta').innerHTML = `第 ${current + 1} 題 / 共 ${questions.length} 題 ・ ${q.category}`;
+      document.getElementById('title').innerHTML = q.title;
+      document.getElementById('question').innerHTML = q.scenario;
+      document.getElementById('result').innerHTML = '';
+      document.getElementById('result').className = 'result';
+      document.getElementById('summary').innerHTML = `目前得分：${score} / ${questions.length}`;
 
-function next(){
-q++;
-if(q>=data.length) q=0;
-load();
-}
+      let html = '';
+      q.options.forEach((opt, i) => {
+        html += `<button class="option-btn" onclick="checkAnswer(${i})">${opt.text}</button>`;
+      });
+      document.getElementById('answers').innerHTML = html;
+    }
 
-load();
+    function checkAnswer(index) {
+      const q = questions[current];
+      if (answered[q.id]) return;
 
-</script>
+      const selected = q.options[index];
+      answered[q.id] = true;
 
+      let resultBox = document.getElementById('result');
+
+      if (selected.correct) {
+        score++;
+        resultBox.className = 'result correct';
+        resultBox.innerHTML = `
+          ✅ 正確！<br>
+          ${q.explanation}
+          <div class="reminder">⚠️ 提醒：${q.reminder}</div>
+        `;
+      } else {
+        resultBox.className = 'result wrong';
+        resultBox.innerHTML = `
+          ❌ 錯誤。<br>
+          ${q.explanation}
+          <div class="reminder">⚠️ 提醒：${q.reminder}</div>
+        `;
+      }
+
+      document.getElementById('summary').innerHTML = `目前得分：${score} / ${questions.length}`;
+    }
+
+    function nextQuestion() {
+      if (current < questions.length - 1) {
+        current++;
+      } else {
+        current = 0;
+      }
+      renderQuestion();
+    }
+
+    function prevQuestion() {
+      if (current > 0) {
+        current--;
+      } else {
+        current = questions.length - 1;
+      }
+      renderQuestion();
+    }
+
+    loadQuestions();
+  </script>
 </body>
 </html>
