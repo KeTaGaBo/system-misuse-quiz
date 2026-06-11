@@ -5,21 +5,55 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quiz</title>
   <style>
+    :root {
+      --ink: #1e1e1e;
+      --bg: #fff8ee;
+      --card: #ffffff;
+      --yellow: #ffd54f;
+      --red: #ff6b6b;
+      --blue: #5da9ff;
+      --green: #5ccf7a;
+      --purple: #9a7cff;
+      --grey: #eef2f7;
+      --shadow: 0 8px 0 #1e1e1e;
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: Arial, sans-serif;
-      background: #f5f5f5;
+      background:
+        radial-gradient(circle at 20% 20%, #fff1b8 0, #fff1b8 2px, transparent 2px) 0 0 / 22px 22px,
+        linear-gradient(180deg, #fff9f0, #fff3df);
       margin: 0;
       padding: 20px;
-      color: #222;
+      color: var(--ink);
     }
 
     .card {
-      background: white;
+      background: var(--card);
       padding: 28px;
-      border-radius: 16px;
-      max-width: 860px;
-      margin: 30px auto;
-      box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+      border-radius: var(--radius);
+      max-width: 920px;
+      margin: 24px auto;
+      border: 3px solid var(--ink);
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      right: -40px;
+      top: -40px;
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, rgba(255, 213, 79, 0.24) 0%, rgba(255, 213, 79, 0.08) 45%, rgba(255,255,255,0) 70%);
+      pointer-events: none;
     }
 
     .topbar {
@@ -32,13 +66,16 @@
 
     .badge {
       display: inline-block;
-      background: #fff3cd;
-      color: #856404;
+      background: var(--yellow);
+      color: var(--ink);
       font-size: 14px;
-      padding: 6px 10px;
+      padding: 8px 12px;
       border-radius: 999px;
       margin-bottom: 12px;
       font-weight: bold;
+      border: 2px solid var(--ink);
+      box-shadow: 3px 3px 0 var(--ink);
+      transform: rotate(-2deg);
     }
 
     .lang-box {
@@ -47,55 +84,82 @@
 
     .lang-label {
       font-size: 13px;
-      color: #666;
+      color: #555;
       margin-bottom: 4px;
+      font-weight: bold;
     }
 
     select {
       padding: 8px 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
+      border-radius: 10px;
+      border: 2px solid var(--ink);
       font-size: 14px;
       background: white;
+      box-shadow: 2px 2px 0 var(--ink);
     }
 
     h1 {
       margin: 0 0 12px 0;
       font-size: 34px;
-      line-height: 1.2;
+      line-height: 1.15;
+      letter-spacing: 0.3px;
+    }
+
+    .hero-subtitle {
+      display: inline-block;
+      background: #fff;
+      border: 2px solid var(--ink);
+      border-radius: 12px;
+      padding: 8px 12px;
+      box-shadow: 3px 3px 0 var(--ink);
+      margin-bottom: 14px;
+      font-weight: bold;
+      color: #444;
     }
 
     .intro {
       font-size: 16px;
-      line-height: 1.7;
+      line-height: 1.75;
       color: #555;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
     }
 
     .meta {
       font-size: 14px;
-      color: #777;
+      color: #666;
       margin-bottom: 8px;
+      font-weight: bold;
     }
 
     .question-title {
       font-size: 26px;
       margin: 0 0 10px 0;
+      line-height: 1.3;
     }
 
     .scenario {
       font-size: 20px;
-      line-height: 1.6;
+      line-height: 1.65;
       margin-bottom: 14px;
     }
 
     .story-card {
       display: none;
-      background: #f7f9fc;
-      border: 1px solid #d9e2ef;
-      border-radius: 14px;
+      background: #f9fbff;
+      border: 3px solid var(--ink);
+      border-radius: 16px;
       padding: 18px;
       margin-bottom: 18px;
+      box-shadow: 5px 5px 0 var(--ink);
+      position: relative;
+    }
+
+    .story-card::before {
+      content: "💬";
+      position: absolute;
+      right: 12px;
+      top: 10px;
+      font-size: 22px;
     }
 
     .story-label {
@@ -103,10 +167,12 @@
       font-size: 13px;
       padding: 5px 10px;
       border-radius: 999px;
-      background: #e8f2fc;
-      color: #2b6cb0;
+      background: var(--blue);
+      color: #fff;
       margin-bottom: 10px;
       font-weight: bold;
+      border: 2px solid var(--ink);
+      box-shadow: 2px 2px 0 var(--ink);
     }
 
     .story-title {
@@ -116,9 +182,13 @@
     }
 
     .story-line {
-      line-height: 1.75;
+      line-height: 1.8;
       margin-bottom: 8px;
       color: #333;
+      background: #fff;
+      border: 2px solid #d9e2ef;
+      padding: 10px 12px;
+      border-radius: 12px;
     }
 
     .question-type {
@@ -126,60 +196,67 @@
       font-size: 13px;
       padding: 5px 10px;
       border-radius: 999px;
-      background: #eef3f8;
+      background: var(--grey);
       color: #4a5568;
-      margin-bottom: 18px;
+      margin-bottom: 14px;
+      border: 2px solid var(--ink);
+      box-shadow: 2px 2px 0 var(--ink);
+      font-weight: bold;
     }
 
     .question-hint {
       font-size: 14px;
-      color: #666;
-      margin-bottom: 10px;
+      color: #555;
+      margin-bottom: 12px;
+      font-weight: bold;
     }
 
     .option-btn {
       width: 100%;
       padding: 14px;
       margin: 8px 0;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      background: white;
+      border-radius: 14px;
+      border: 3px solid var(--ink);
+      background: #fff;
       cursor: pointer;
       font-size: 17px;
-      transition: 0.2s ease;
+      transition: 0.18s ease;
       text-align: left;
       display: flex;
       align-items: flex-start;
       gap: 10px;
+      box-shadow: 4px 4px 0 var(--ink);
     }
 
     .option-btn:hover {
-      background: #f3f3f3;
+      transform: translate(-1px, -1px);
+      box-shadow: 5px 5px 0 var(--ink);
+      background: #fffdf8;
     }
 
     .option-btn:disabled {
       cursor: default;
-      opacity: 0.95;
+      opacity: 0.98;
     }
 
     .option-letter {
       font-weight: bold;
-      min-width: 24px;
+      min-width: 26px;
     }
 
     .option-selected {
-      border-color: #0078d4;
-      background: #e8f2fc;
+      border-color: #005fcc;
+      background: #edf5ff;
     }
 
     .option-correct {
-      border-color: #28a745;
-      background: #d4edda;
+      border-color: #0b7a2c;
+      background: #dff7e6;
     }
 
     .option-wrong {
-      border-color: #dc3545;
-      background: #f8d7da;
+      border-color: #b42318;
+      background: #ffe3e0;
     }
 
     .answer-action {
@@ -189,16 +266,18 @@
 
     .action-btn {
       padding: 12px 18px;
-      border-radius: 10px;
-      border: none;
+      border-radius: 12px;
+      border: 3px solid var(--ink);
       cursor: pointer;
       font-size: 15px;
-      background: #0078d4;
+      background: var(--blue);
       color: white;
+      box-shadow: 4px 4px 0 var(--ink);
+      font-weight: bold;
     }
 
     .action-btn:hover {
-      background: #106ebe;
+      transform: translate(-1px, -1px);
     }
 
     .action-btn:disabled {
@@ -209,30 +288,29 @@
     .result {
       margin-top: 22px;
       padding: 16px;
-      border-radius: 10px;
-      line-height: 1.8;
+      border-radius: 14px;
+      line-height: 1.85;
       font-size: 16px;
       display: none;
+      border: 3px solid var(--ink);
+      box-shadow: 4px 4px 0 var(--ink);
     }
 
     .correct {
-      background: #d4edda;
-      color: #155724;
-      border: 1px solid #b7dfbf;
+      background: #dff7e6;
+      color: #135626;
       display: block;
     }
 
     .wrong {
-      background: #f8d7da;
-      color: #721c24;
-      border: 1px solid #efb5ba;
+      background: #ffe3e0;
+      color: #7a1e18;
       display: block;
     }
 
     .info {
-      background: #e8f4fd;
-      color: #0c5460;
-      border: 1px solid #b8daff;
+      background: #eef6ff;
+      color: #163b63;
       display: block;
     }
 
@@ -241,47 +319,102 @@
       font-weight: bold;
     }
 
+    .level-badge {
+      display: inline-block;
+      margin-top: 8px;
+      margin-bottom: 12px;
+      background: #fff;
+      color: var(--ink);
+      border: 3px solid var(--ink);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-weight: bold;
+      box-shadow: 3px 3px 0 var(--ink);
+    }
+
+    .share-box {
+      margin-top: 18px;
+      background: #fff;
+      border: 3px dashed var(--ink);
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .share-title {
+      font-weight: bold;
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+
+    .share-text {
+      color: #444;
+      line-height: 1.7;
+      margin-bottom: 10px;
+    }
+
+    .share-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .share-btn {
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 3px solid var(--ink);
+      background: #fff;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 3px 3px 0 var(--ink);
+    }
+
+    .share-btn:hover {
+      transform: translate(-1px, -1px);
+    }
+
+    .copy-msg {
+      margin-top: 10px;
+      font-size: 14px;
+      font-weight: bold;
+      color: #00703c;
+      display: none;
+    }
+
     .controls {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
       gap: 10px;
       margin-top: 24px;
       flex-wrap: wrap;
     }
 
     .nav-btn {
-      flex: 1;
-      min-width: 120px;
+      min-width: 150px;
       padding: 12px;
-      border-radius: 10px;
-      border: none;
+      border-radius: 12px;
+      border: 3px solid var(--ink);
       cursor: pointer;
       font-size: 16px;
+      font-weight: bold;
+      box-shadow: 4px 4px 0 var(--ink);
     }
 
     .nav-btn.primary {
-      background: #0078d4;
+      background: var(--red);
       color: white;
     }
 
     .nav-btn.primary:hover {
-      background: #106ebe;
-    }
-
-    .nav-btn.secondary {
-      background: #eaeaea;
-      color: #333;
-    }
-
-    .nav-btn.secondary:hover {
-      background: #dcdcdc;
+      transform: translate(-1px, -1px);
     }
 
     .summary {
       margin-top: 24px;
       font-size: 15px;
-      color: #666;
+      color: #555;
       text-align: right;
+      font-weight: bold;
     }
 
     .footer-note {
@@ -289,8 +422,9 @@
       font-size: 14px;
       color: #666;
       text-align: center;
-      border-top: 1px solid #eee;
+      border-top: 2px dashed #ccc;
       padding-top: 16px;
+      font-weight: bold;
     }
 
     @media (max-width: 600px) {
@@ -317,6 +451,14 @@
       .story-title {
         font-size: 20px;
       }
+
+      .controls {
+        justify-content: stretch;
+      }
+
+      .nav-btn {
+        width: 100%;
+      }
     }
   </style>
 </head>
@@ -337,6 +479,7 @@
       </div>
     </div>
 
+    <div class="hero-subtitle" id="heroSubtitle">⚠️ 真實案例改編 × 漫畫式互動學習</div>
     <h1 id="siteTitle"></h1>
     <div class="intro" id="intro"></div>
 
@@ -377,6 +520,55 @@
     let current = 0;
     let answersState = {};
     let showingFinal = false;
+
+    const LOCAL_UI = {
+      "zh-HK": {
+        heroSubtitle: "⚠️ 真實案例改編 × 漫畫式互動學習",
+        answerBeforeNext: "請先回答這一題，才可進入下一題。",
+        levelLabel: "結果級別",
+        levels: {
+          perfect: "🛡️ 資料守護者",
+          pass70: "🔎 風險偵察員",
+          below70: "🌱 界線再學習者"
+        },
+        shareTitle: "📢 覺得有用？分享畀朋友試下！",
+        shareText: "你可以把這個小測驗分享給同事、親友或青少年，看看大家會不會在「看似無傷大雅」的情境下都作出同一判斷。",
+        copyLink: "複製連結",
+        copied: "✅ 已複製連結，快啲分享出去！"
+      },
+      "zh-CN": {
+        heroSubtitle: "⚠️ 真实案例改编 × 漫画式互动学习",
+        answerBeforeNext: "请先回答这一题，才可进入下一题。",
+        levelLabel: "结果级别",
+        levels: {
+          perfect: "🛡️ 资料守护者",
+          pass70: "🔎 风险侦察员",
+          below70: "🌱 界线再学习者"
+        },
+        shareTitle: "📢 觉得有用？分享给朋友试试看！",
+        shareText: "你可以把这个小测验分享给同事、亲友或青少年，看看大家会不会在“看似无伤大雅”的情境下都作出同一判断。",
+        copyLink: "复制链接",
+        copied: "✅ 链接已复制，快去分享吧！"
+      },
+      "en": {
+        heroSubtitle: "⚠️ Real Cases × Comic-style Interactive Learning",
+        answerBeforeNext: "Please answer this question before moving to the next one.",
+        levelLabel: "Result Level",
+        levels: {
+          perfect: "🛡️ Data Guardian",
+          pass70: "🔎 Risk Spotter",
+          below70: "🌱 Boundary Learner"
+        },
+        shareTitle: "📢 Found this useful? Share it with others!",
+        shareText: "You can share this quiz with colleagues, friends, family members, or teenagers and see whether they make the same judgment in situations that look harmless on the surface.",
+        copyLink: "Copy Link",
+        copied: "✅ Link copied. Share it now!"
+      }
+    };
+
+    function getLocalText(key) {
+      return LOCAL_UI[currentLang][key];
+    }
 
     function getScore() {
       if (!quizData) return 0;
@@ -453,6 +645,7 @@
       document.getElementById("langSelect").value = currentLang;
       document.getElementById("langLabel").innerText = ui.langLabel || "Language / 語言 / 语言";
       document.getElementById("checkBtn").innerText = ui.checkAnswer;
+      document.getElementById("heroSubtitle").innerText = getLocalText("heroSubtitle");
     }
 
     function updateSummary() {
@@ -490,18 +683,32 @@
       resultBox.style.display = "block";
     }
 
-    function getEncouragementMessage() {
+    function getLevelKey() {
       const total = quizData.questions.length;
       const score = getScore();
       const ratio = score / total;
 
-      if (score === total) {
-        return quizData.messages.perfect[currentLang];
-      } else if (ratio >= 0.7) {
-        return quizData.messages.pass70[currentLang];
-      } else {
-        return quizData.messages.below70[currentLang];
-      }
+      if (score === total) return "perfect";
+      if (ratio >= 0.7) return "pass70";
+      return "below70";
+    }
+
+    function getEncouragementMessage() {
+      const levelKey = getLevelKey();
+      return quizData.messages[levelKey][currentLang];
+    }
+
+    function renderShareSection() {
+      return `
+        <div class="share-box">
+          <div class="share-title">${getLocalText("shareTitle")}</div>
+          <div class="share-text">${getLocalText("shareText")}</div>
+          <div class="share-actions">
+            <button class="share-btn" onclick="copyQuizLink()">${getLocalText("copyLink")}</button>
+          </div>
+          <div class="copy-msg" id="copyMsg">${getLocalText("copied")}</div>
+        </div>
+      `;
     }
 
     function showFinalResult() {
@@ -523,16 +730,19 @@
       const total = quizData.questions.length;
       const score = getScore();
       const scorePercent = Math.round((score / total) * 100);
+      const levelKey = getLevelKey();
+      const levelName = getLocalText("levels")[levelKey];
 
       box.className = "result info";
       box.innerHTML = `
         <strong>${getUIText("resultTitle")}</strong><br>
-        ${getUIText("scoreLabel")}：${score} / ${total} (${scorePercent}%)<br><br>
-        ${getEncouragementMessage()}
+        ${getUIText("scoreLabel")}：${score} / ${total} (${scorePercent}%)<br>
+        <div class="level-badge">${getLocalText("levelLabel")}：${levelName}</div>
+        <div>${getEncouragementMessage()}</div>
+        ${renderShareSection()}
       `;
       box.style.display = "block";
 
-      document.getElementById("prevBtn").innerText = getUIText("restart");
       document.getElementById("nextBtn").innerText = getUIText("restart");
       updateSummary();
     }
@@ -545,6 +755,21 @@
       box.innerHTML = "";
       box.style.display = "none";
       showingFinal = false;
+    }
+
+    function copyQuizLink() {
+      const url = window.location.origin + window.location.pathname + "?lang=" + currentLang;
+      navigator.clipboard.writeText(url).then(() => {
+        const msg = document.getElementById("copyMsg");
+        if (msg) {
+          msg.style.display = "block";
+          setTimeout(() => {
+            msg.style.display = "none";
+          }, 2500);
+        }
+      }).catch(() => {
+        alert(url);
+      });
     }
 
     function getOptionLetter(index) {
@@ -654,7 +879,7 @@
 
       updateSummary();
 
-      if (allAnswered() && current === quizData.questions.length - 1) {
+      if (allAnswered() && current === quizData.questions.length - 1 && alreadySubmitted) {
         document.getElementById("nextBtn").innerText = getUIText("finish");
       } else {
         document.getElementById("nextBtn").innerText = getUIText("next");
@@ -707,31 +932,28 @@
 
     function nextQuestion() {
       if (!quizData) return;
-    
+
       if (showingFinal) {
         restartQuiz();
         return;
       }
-    
+
       const question = quizData.questions[current];
       const state = getQuestionState(question.id);
-    
-      // 未作答，不可前往下一題
+
       if (!state.submitted) {
-        alert(getUIText("answerBeforeNext"));
+        alert(getLocalText("answerBeforeNext"));
         return;
       }
-    
-      // 最後一題且已全部作答 → 顯示結果
+
       if (current === quizData.questions.length - 1) {
         showFinalResult();
         return;
       }
-    
+
       current++;
       renderQuestion();
     }
-
 
     async function loadQuestions() {
       try {
