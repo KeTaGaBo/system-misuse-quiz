@@ -362,7 +362,6 @@
     <div id="result" class="result"></div>
 
     <div class="controls">
-      <button class="nav-btn secondary" id="prevBtn"></button>
       <button class="nav-btn primary" id="nextBtn"></button>
     </div>
 
@@ -449,7 +448,6 @@
       document.getElementById("badge").innerText = ui.badge;
       document.getElementById("siteTitle").innerText = ui.siteTitle;
       document.getElementById("intro").innerText = ui.intro;
-      document.getElementById("prevBtn").innerText = ui.prev;
       document.getElementById("nextBtn").innerText = ui.next;
       document.getElementById("footer").innerText = ui.footer;
       document.getElementById("langSelect").value = currentLang;
@@ -709,46 +707,31 @@
 
     function nextQuestion() {
       if (!quizData) return;
-
+    
       if (showingFinal) {
         restartQuiz();
         return;
       }
-
-      if (allAnswered() && current === quizData.questions.length - 1) {
+    
+      const question = quizData.questions[current];
+      const state = getQuestionState(question.id);
+    
+      // 未作答，不可前往下一題
+      if (!state.submitted) {
+        alert(getUIText("answerBeforeNext"));
+        return;
+      }
+    
+      // 最後一題且已全部作答 → 顯示結果
+      if (current === quizData.questions.length - 1) {
         showFinalResult();
         return;
       }
-
-      if (current < quizData.questions.length - 1) {
-        current++;
-        renderQuestion();
-      } else {
-        if (allAnswered()) {
-          showFinalResult();
-        } else {
-          current = 0;
-          renderQuestion();
-        }
-      }
-    }
-
-    function prevQuestion() {
-      if (!quizData) return;
-
-      if (showingFinal) {
-        restartQuiz();
-        return;
-      }
-
-      if (current > 0) {
-        current--;
-      } else {
-        current = quizData.questions.length - 1;
-      }
-
+    
+      current++;
       renderQuestion();
     }
+
 
     async function loadQuestions() {
       try {
@@ -792,7 +775,6 @@
 
     document.getElementById("checkBtn").addEventListener("click", submitMultipleAnswer);
     document.getElementById("nextBtn").addEventListener("click", nextQuestion);
-    document.getElementById("prevBtn").addEventListener("click", prevQuestion);
 
     loadQuestions();
   </script>
