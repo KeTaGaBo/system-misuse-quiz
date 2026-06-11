@@ -246,156 +246,166 @@
     <div class="footer-note" id="footer"></div>
   </div>
 
-  <script>
-    let quizData = null;
-    let currentLang = "zh-HK";
-    let current = 0;
-    let answeredSelections = {};
+<script>
+  let quizData = null;
+  let currentLang = "zh-HK";
+  let current = 0;
+  let answeredSelections = {};
 
-    function getScore() {
-      if (!quizData) return 0;
-      let score = 0;
-      quizData.questions.forEach(q => {
-        const sel = answeredSelections[q.id];
-        if (sel !== undefined && q.options[sel] && q.options[sel].correct) {
-          score++;
-        }
-      });
-      return score;
-    }
-
-    function getUIText(key) {
-      return quizData.ui[currentLang][key];
-    }
-
-    function updateLanguageInUrl(lang) {
-      const url = new URL(window.location);
-      url.searchParams.set("lang", lang);
-      window.history.replaceState({}, "", url);
-    }
-
-    function applyLanguageUI() {
-      const ui = quizData.ui[currentLang];
-      document.title = ui.siteTitle;
-      document.documentElement.lang = currentLang;
-
-      document.getElementById("badge").innerText = ui.badge;
-      document.getElementById("siteTitle").innerText = ui.siteTitle;
-      document.getElementById("intro").innerText = ui.intro;
-      document.getElementById("prevBtn").innerText = ui.prev;
-      document.getElementById("nextBtn").innerText = ui.next;
-      document.getElementById("footer").innerText = ui.footer;
-      document.getElementById("langSelect").value = currentLang;
-    }
-
-    function renderQuestion() {
-      const q = quizData.questions[current];
-      if (!q) return;
-
-      applyLanguageUI();
-
-      const questionLabel = getUIText("questionLabel")
-        .replace("{current}", current + 1)
-        .replace("{total}", quizData.questions.length);
-
-      document.getElementById("meta").innerHTML = `${questionLabel} ・ ${q.category[currentLang]}`;
-      document.getElementById("title").innerHTML = q.title[currentLang];
-      document.getElementById("question").innerHTML = q.scenario[currentLang];
-      document.getElementById("result").innerHTML = "";
-      document.getElementById("result").className = "result";
-
-      const score = getScore();
-      document.getElementById("summary").innerHTML = `${getUIText("scoreLabel")}：${score} / ${quizData.questions.length}`;
-
-      let html = "";
-      const alreadyAnswered = answeredSelections[q.id] !== undefined;
-
-      q.options.forEach((opt, i) => {
-        html += `<button class="option-btn" onclick="checkAnswer(${i})" ${alreadyAnswered ? "disabled" : ""}>${opt.text[currentLang]}</button>`;
-      });
-
-      document.getElementById("answers").innerHTML = html;
-
-      if (alreadyAnswered) {
-        showResult(q, answeredSelections[q.id]);
+  function getScore() {
+    if (!quizData) return 0;
+    let score = 0;
+    quizData.questions.forEach(q => {
+      const sel = answeredSelections[q.id];
+      if (sel !== undefined && q.options[sel] && q.options[sel].correct) {
+        score++;
       }
-    }
+    });
+    return score;
+  }
 
-    function showResult(q, selectedIndex) {
-      const selected = q.options[selectedIndex];
-      const resultBox = document.getElementById("result");
+  function getUIText(key) {
+    return quizData.ui[currentLang][key];
+  }
 
-      if (selected.correct) {
-        resultBox.className = "result correct";
-        resultBox.innerHTML = `
-          ${getUIText("correctLabel")}<br>
-          ${q.explanation[currentLang]}
-          <div class="reminder">${getUIText("reminderLabel")}：${q.reminder[currentLang]}</div>
-        `;
-      } else {
-        resultBox.className = "result wrong";
-        resultBox.innerHTML = `
-          ${getUIText("wrongLabel")}<br>
-          ${q.explanation[currentLang]}
-          <div class="reminder">${getUIText("reminderLabel")}：${q.reminder[currentLang]}</div>
-        `;
-      }
-    }
+  function updateLanguageInUrl(lang) {
+    const url = new URL(window.location);
+    url.searchParams.set("lang", lang);
+    window.history.replaceState({}, "", url);
+  }
 
-    function checkAnswer(index) {
-      const q = quizData.questions[current];
-      if (answeredSelections[q.id] !== undefined) return;
+  function applyLanguageUI() {
+    const ui = quizData.ui[currentLang];
+    document.title = ui.siteTitle;
+    document.documentElement.lang = currentLang;
 
-      answeredSelections[q.id] = index;
-      showResult(q, index);
+    document.getElementById("badge").innerText = ui.badge;
+    document.getElementById("siteTitle").innerText = ui.siteTitle;
+    document.getElementById("intro").innerText = ui.intro;
+    document.getElementById("prevBtn").innerText = ui.prev;
+    document.getElementById("nextBtn").innerText = ui.next;
+    document.getElementById("footer").innerText = ui.footer;
+    document.getElementById("langSelect").value = currentLang;
+  }
 
-      const score = getScore();
-      document.getElementById("summary").innerHTML = `${getUIText("scoreLabel")}：${score} / ${quizData.questions.length}`;
+  function renderQuestion() {
+    const q = quizData.questions[current];
+    if (!q) return;
 
-      renderQuestion();
-    }
+    applyLanguageUI();
 
-    function nextQuestion() {
-      if (!quizData) return;
-      current = (current < quizData.questions.length - 1) ? current + 1 : 0;
-      renderQuestion();
-    }
+    const questionLabel = getUIText("questionLabel")
+      .replace("{current}", current + 1)
+      .replace("{total}", quizData.questions.length);
 
-    function prevQuestion() {
-      if (!quizData) return;
-      current = (current > 0) ? current - 1 : quizData.questions.length - 1;
-      renderQuestion();
-    }
+    document.getElementById("meta").innerHTML = `${questionLabel} ・ ${q.category[currentLang]}`;
+    document.getElementById("title").innerHTML = q.title[currentLang];
+    document.getElementById("question").innerHTML = q.scenario[currentLang];
 
-    async function loadQuestions() {
-      try {
-        const response = await fetch("questions.json");
-        quizData = await response.json();
+    const resultBox = document.getElementById("result");
+    resultBox.innerHTML = "";
+    resultBox.className = "result";
 
-        const urlLang = new URLSearchParams(window.location.search).get("lang");
-        const supported = ["zh-HK", "zh-CN", "en"];
+    const score = getScore();
+    document.getElementById("summary").innerHTML = `${getUIText("scoreLabel")}：${score} / ${quizData.questions.length}`;
 
-        if (supported.includes(urlLang)) {
-          currentLang = urlLang;
-        }
+    let html = "";
+    const alreadyAnswered = answeredSelections[q.id] !== undefined;
 
-        renderQuestion();
-      } catch (error) {
-        document.body.innerHTML = `<div class="card"><div class="result wrong">${quizData?.ui?.[currentLang]?.loadError || "Failed to load quiz"}</div></div>`;
-        console.error(error);
-      }
-    }
-
-    document.getElementById("langSelect").addEventListener("change", function () {
-      currentLang = this.value;
-      updateLanguageInUrl(currentLang);
-      renderQuestion();
+    q.options.forEach((opt, i) => {
+      html += `
+        <button class="option-btn" onclick="checkAnswer(${i})" ${alreadyAnswered ? "disabled" : ""}>
+          ${opt.text[currentLang]}
+        </button>`;
     });
 
-    document.getElementById("nextBtn").addEventListener("click", nextQuestion);
-    document.getElementById("prevBtn").addEventListener("click", prevQuestion);
+    document.getElementById("answers").innerHTML = html;
 
-    loadQuestions();
-  </script>
+    if (alreadyAnswered) {
+      showResult(q, answeredSelections[q.id]);
+    }
+  }
+
+  function disableCurrentOptions() {
+    const buttons = document.querySelectorAll("#answers .option-btn");
+    buttons.forEach(btn => btn.disabled = true);
+  }
+
+  function showResult(q, selectedIndex) {
+    const selected = q.options[selectedIndex];
+    const resultBox = document.getElementById("result");
+
+    if (selected.correct) {
+      resultBox.className = "result correct";
+      resultBox.innerHTML = `
+        ${getUIText("correctLabel")}<br>
+        ${q.explanation[currentLang]}
+        <div class="reminder">${getUIText("reminderLabel")}：${q.reminder[currentLang]}</div>
+      `;
+    } else {
+      resultBox.className = "result wrong";
+      resultBox.innerHTML = `
+        ${getUIText("wrongLabel")}<br>
+        ${q.explanation[currentLang]}
+        <div class="reminder">${getUIText("reminderLabel")}：${q.reminder[currentLang]}</div>
+      `;
+    }
+  }
+
+  function checkAnswer(index) {
+    const q = quizData.questions[current];
+    if (answeredSelections[q.id] !== undefined) return;
+
+    answeredSelections[q.id] = index;
+
+    showResult(q, index);
+    disableCurrentOptions();
+
+    const score = getScore();
+    document.getElementById("summary").innerHTML = `${getUIText("scoreLabel")}：${score} / ${quizData.questions.length}`;
+  }
+
+  function nextQuestion() {
+    if (!quizData) return;
+    current = (current < quizData.questions.length - 1) ? current + 1 : 0;
+    renderQuestion();
+  }
+
+  function prevQuestion() {
+    if (!quizData) return;
+    current = (current > 0) ? current - 1 : quizData.questions.length - 1;
+    renderQuestion();
+  }
+
+  async function loadQuestions() {
+    try {
+      const response = await fetch("questions.json");
+      quizData = await response.json();
+
+      const urlLang = new URLSearchParams(window.location.search).get("lang");
+      const supported = ["zh-HK", "zh-CN", "en"];
+
+      if (supported.includes(urlLang)) {
+        currentLang = urlLang;
+      }
+
+      renderQuestion();
+    } catch (error) {
+      document.body.innerHTML = `<div class="card"><div class="result wrong">❌ Failed to load quiz</div></div>`;
+      console.error(error);
+    }
+  }
+
+  document.getElementById("langSelect").addEventListener("change", function () {
+    currentLang = this.value;
+    updateLanguageInUrl(currentLang);
+    renderQuestion();
+  });
+
+  document.getElementById("nextBtn").addEventListener("click", nextQuestion);
+  document.getElementById("prevBtn").addEventListener("click", prevQuestion);
+
+  loadQuestions();
+</script>
 </body>
 </html>
