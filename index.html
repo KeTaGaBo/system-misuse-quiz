@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>你以為冇問題？其實可能犯法</title>
+
+<style>
+body {
+  font-family: Arial;
+  background:#f5f5f5;
+  padding:20px;
+}
+.card {
+  background:white;
+  padding:20px;
+  border-radius:12px;
+  max-width:500px;
+  margin:auto;
+}
+button {
+  width:100%;
+  padding:10px;
+  margin:5px 0;
+  border-radius:8px;
+  border:1px solid #ccc;
+  cursor:pointer;
+}
+.correct { background:#d4edda;}
+.wrong { background:#f8d7da;}
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+<h2>你以為冇問題？其實可能犯法</h2>
+
+<p id="question"></p>
+
+<div id="answers"></div>
+
+<p id="result"></p>
+
+<button onclick="next()">下一題</button>
+</div>
+
+<script>
+
+let q=0;
+
+const data=[
+{
+q:"只係查看朋友資料，唔外傳，可以嗎？",
+a:[
+{text:"可以",c:false},
+{text:"不可以",c:true}
+],
+exp:"單純查看已可能違規"
+},
+{
+q:"用同事帳號幫手？",
+a:[
+{text:"可以",c:false},
+{text:"不可以",c:true}
+],
+exp:"借帳號 = 未授權存取"
+}
+];
+
+function load(){
+document.getElementById("result").innerHTML="";
+document.getElementById("question").innerHTML=data[q].q;
+
+let html="";
+data[q].a.forEach((opt,i)=>{
+html+=`<button onclick="check(${i})">${opt.text}</button>`;
+});
+document.getElementById("answers").innerHTML=html;
+}
+
+function check(i){
+let res=data[q].a[i].c;
+let msg=res?"✅ 正確":"❌ 錯誤";
+
+document.getElementById("result").innerHTML=
+msg+"<br>"+data[q].exp;
+}
+
+function next(){
+q++;
+if(q>=data.length) q=0;
+load();
+}
+
+load();
+
+</script>
+
+</body>
+</html>
