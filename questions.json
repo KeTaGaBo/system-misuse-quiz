@@ -1,10 +1,10 @@
 {
   "ui": {
     "zh-HK": {
-      "answerBeforeNext": "請先回答這一題，才可進入下一題。",
       "badge": "真實情境改編",
       "siteTitle": "你以為冇問題？其實可能犯法",
-      "intro": "以下題目有些是直接判斷題，有些是情境題。部分題目可能只有一個最佳答案，部分題目則可能需要同時選出多個正確答案。試試你的判斷。",
+      "heroSubtitle": "⚠️ 漫畫式互動學習 × 真實風險判斷",
+      "intro": "以下題目有些是直接判斷題，有些是情境題。部分題目只有一個最佳答案，部分題目則可能需要同時選出多個正確答案。試試你的判斷，看看哪些「看似方便」的做法，其實最容易出事。",
       "prev": "上一題",
       "next": "下一題",
       "scoreLabel": "目前得分",
@@ -24,13 +24,25 @@
       "singleHint": "請選出 1 個最合適答案。",
       "multipleHint": "本題可選多項，需全部選對才算正確。",
       "selectAtLeastOne": "請先選擇至少一個答案。",
-      "scenarioLabelDefault": "情境"
+      "scenarioLabelDefault": "情境",
+      "answerBeforeNext": "請先回答這一題，才可進入下一題。",
+      "levelLabel": "結果級別",
+      "levels": {
+        "perfect": "🛡️ 資料守護者",
+        "pass70": "🔎 風險偵察員",
+        "below70": "🌱 界線再學習者"
+      },
+      "shareTitle": "📢 覺得有用？分享畀朋友試下！",
+      "shareText": "你可以把呢個小測驗分享俾同事、朋友、家人或青少年，睇下大家會唔會喺「看似無傷大雅」的情境下都作出同一判斷。",
+      "copyLink": "複製連結",
+      "copied": "✅ 已複製連結，快啲分享出去！"
     },
+
     "zh-CN": {
       "badge": "真实情境改编",
-      "answerBeforeNext": "请先回答这一题，才可进入下一题。",
       "siteTitle": "你以为没问题？其实可能犯法",
-      "intro": "以下题目有些是直接判断题，有些是情境题。部分题目可能只有一个最佳答案，部分题目则可能需要同时选出多个正确答案。试试你的判断。",
+      "heroSubtitle": "⚠️ 漫画式互动学习 × 真实风险判断",
+      "intro": "以下题目有些是直接判断题，有些是情境题。部分题目只有一个最佳答案，部分题目则可能需要同时选出多个正确答案。试试你的判断，看看哪些“看似方便”的做法，其实最容易出事。",
       "prev": "上一题",
       "next": "下一题",
       "scoreLabel": "当前得分",
@@ -50,13 +62,25 @@
       "singleHint": "请选择 1 个最合适答案。",
       "multipleHint": "本题可选多项，必须全部选对才算正确。",
       "selectAtLeastOne": "请先选择至少一个答案。",
-      "scenarioLabelDefault": "情境"
+      "scenarioLabelDefault": "情境",
+      "answerBeforeNext": "请先回答这一题，才可进入下一题。",
+      "levelLabel": "结果级别",
+      "levels": {
+        "perfect": "🛡️ 资料守护者",
+        "pass70": "🔎 风险侦察员",
+        "below70": "🌱 界线再学习者"
+      },
+      "shareTitle": "📢 觉得有用？分享给朋友试试看！",
+      "shareText": "你可以把这个小测验分享给同事、朋友、家人或青少年，看看大家会不会在“看似无伤大雅”的情境下都作出同一判断。",
+      "copyLink": "复制链接",
+      "copied": "✅ 链接已复制，快去分享吧！"
     },
+
     "en": {
       "badge": "Based on Real-life Scenarios",
-      "answerBeforeNext": "Please answer this question before moving to the next one.",
       "siteTitle": "You Think It’s Fine? It Might Actually Be Illegal",
-      "intro": "Some questions below are direct judgment questions, while others are scenario-based. Some require one best answer; others may require multiple correct answers. Test your judgment.",
+      "heroSubtitle": "⚠️ Comic-style Interactive Learning × Real-world Risk Judgment",
+      "intro": "Some questions below are direct judgment questions, while others are scenario-based. Some require one best answer; others may require multiple correct answers. Test your judgment and see which “convenient” choices are actually the riskiest.",
       "prev": "Previous",
       "next": "Next",
       "scoreLabel": "Current score",
@@ -76,25 +100,36 @@
       "singleHint": "Choose the one best answer.",
       "multipleHint": "Multiple answers may be correct. You must choose all correct answers to score a point.",
       "selectAtLeastOne": "Please select at least one answer.",
-      "scenarioLabelDefault": "Scenario"
+      "scenarioLabelDefault": "Scenario",
+      "answerBeforeNext": "Please answer this question before moving to the next one.",
+      "levelLabel": "Result Level",
+      "levels": {
+        "perfect": "🛡️ Data Guardian",
+        "pass70": "🔎 Risk Spotter",
+        "below70": "🌱 Boundary Learner"
+      },
+      "shareTitle": "📢 Found this useful? Share it with others!",
+      "shareText": "You can share this quiz with colleagues, friends, family members, or teenagers and see whether they make the same judgment in situations that look harmless on the surface.",
+      "copyLink": "Copy Link",
+      "copied": "✅ Link copied. Share it now!"
     }
   },
 
   "messages": {
     "perfect": {
-      "zh-HK": "滿分！你對資料使用界線有很清晰的理解，亦能分辨表面上『似乎合理』但實際上有風險的做法。",
-      "zh-CN": "满分！你对资料使用界线有很清晰的理解，也能分辨表面上“似乎合理”但实际上有风险的做法。",
-      "en": "Perfect score! You have a very clear understanding of the boundaries for using data and can distinguish between actions that seem reasonable and those that still carry risk."
+      "zh-HK": "滿分！你對資料使用界線有很清晰的理解，亦能分辨那些表面上『似乎合理』、其實高風險的做法。",
+      "zh-CN": "满分！你对资料使用界线有很清晰的理解，也能分辨那些表面上“似乎合理”、其实高风险的做法。",
+      "en": "Perfect score! You have a very clear understanding of data-use boundaries and can distinguish actions that seem reasonable on the surface but are actually high-risk."
     },
     "pass70": {
-      "zh-HK": "做得不錯！你已掌握大部分重點。不過，情境題反映現實世界往往不止一個陷阱，仍值得再留意細節。",
-      "zh-CN": "做得不错！你已掌握大部分重点。不过，情境题反映现实世界往往不止一个陷阱，仍值得再留意细节。",
-      "en": "Well done! You have understood most of the key points. However, scenario-based questions reflect the real world: there is often more than one risk to notice."
+      "zh-HK": "做得不錯！你已掌握大部分重點。不過，真實世界很多風險都藏在『趕時間』『幫個手』『大家都咁做』這些情境之中，仍值得再留意。",
+      "zh-CN": "做得不错！你已掌握大部分重点。不过，现实世界很多风险都藏在“赶时间”“帮个忙”“大家都这样做”这些情境之中，仍值得再留意。",
+      "en": "Well done! You have understood most of the key points. However, many real-life risks hide inside situations like “we’re in a hurry,” “I’m only helping,” or “everyone does it,” so it is still worth staying alert."
     },
     "below70": {
-      "zh-HK": "這次未到理想分數，不要緊。這正正反映很多風險行為在直覺上並不明顯。最重要是記住：系統有漏洞，不等於你可以使用它。",
-      "zh-CN": "这次未达到理想分数，不要紧。这正反映很多风险行为在直觉上并不明显。最重要是记住：系统有漏洞，不等于你可以使用它。",
-      "en": "This time the score was below target, but that is okay. Many risky behaviours are not obvious at first glance. The key reminder is this: a system weakness does not mean you are allowed to use it."
+      "zh-HK": "這次未到理想分數，不要緊。好多風險行為本來就不是一眼看穿。最重要是記住：系統有漏洞，不等於你可以使用它；出於好意，也不代表做法安全。",
+      "zh-CN": "这次未达到理想分数，不要紧。很多风险行为本来就不是一眼看穿。最重要是记住：系统有漏洞，不等于你可以使用它；出于好意，也不代表做法安全。",
+      "en": "This time the score was below target, but that is okay. Many risky behaviours are not obvious at first glance. The key reminder is this: a system weakness does not mean you are allowed to use it, and good intentions do not automatically make an action safe."
     }
   },
 
@@ -114,48 +149,48 @@
         "en": "Which statement is the most accurate?"
       },
       "scenario": {
-        "zh-HK": "你在系統中看到一位熟人資料，你沒有下載、截圖或外傳，只是出於好奇看一看。以下哪一項最準確？",
-        "zh-CN": "你在系统中看到一位熟人资料，你没有下载、截图或外传，只是出于好奇看一看。以下哪一项最准确？",
-        "en": "You see the record of someone you know in the system. You do not download, screenshot, or share anything—you are merely curious and take a look. Which statement is the most accurate?"
+        "zh-HK": "你喺系統入面見到一位熟人資料，你無下載、無截圖、無外傳，只係出於好奇望一望。以下哪一項最準確？",
+        "zh-CN": "你在系统里看到一位熟人资料，你没有下载、截图或外传，只是出于好奇看一看。以下哪一项最准确？",
+        "en": "You notice the record of someone you know in the system. You do not download, screenshot, or share it—you simply look out of curiosity. Which statement is the most accurate?"
       },
       "options": [
         {
           "text": {
-            "zh-HK": "只要不外傳，就沒有問題。",
-            "zh-CN": "只要不外传，就没有问题。",
+            "zh-HK": "只要無外傳，就無問題。",
+            "zh-CN": "只要没有外传，就没有问题。",
             "en": "It is fine as long as nothing is shared."
           },
           "correct": false
         },
         {
           "text": {
-            "zh-HK": "只要對方是熟人，就不算違規。",
-            "zh-CN": "只要对方是熟人，就不算违规。",
+            "zh-HK": "只要對方係你識嘅人，就唔算違規。",
+            "zh-CN": "只要对方是你认识的人，就不算违规。",
             "en": "It is not a breach if the person is someone you know."
           },
           "correct": false
         },
         {
           "text": {
-            "zh-HK": "如果沒有工作需要，單純查看本身已可能構成不當使用。",
+            "zh-HK": "如果無工作需要，單純查看本身已可能構成不當使用。",
             "zh-CN": "如果没有工作需要，单纯查看本身已可能构成不当使用。",
-            "en": "If there is no work-related need, simply viewing the data may already be improper."
+            "en": "If there is no work-related need, simply viewing the data may already constitute misuse."
           },
           "correct": true
         },
         {
           "text": {
-            "zh-HK": "只要 IT 沒有阻止你看到，就代表可以看。",
-            "zh-CN": "只要 IT 没有阻止你看到，就代表可以看。",
-            "en": "If IT did not block it, that means you are allowed to view it."
+            "zh-HK": "只要系統有顯示，即係可以看。",
+            "zh-CN": "只要系统有显示，就表示可以看。",
+            "en": "If the system shows it, then you are allowed to view it."
           },
           "correct": false
         }
       ],
       "explanation": {
-        "zh-HK": "即使沒有下載或分享，未經授權查閱與自己工作無關的資料，本身已可能屬於不當使用。",
+        "zh-HK": "即使無下載或分享，未經授權查閱與自己工作無關的資料，本身已可能屬於不當使用。",
         "zh-CN": "即使没有下载或分享，未经授权查阅与自己工作无关的资料，本身已可能属于不当使用。",
-        "en": "Even without downloading or sharing, viewing data unrelated to your work without authorization may already constitute misuse."
+        "en": "Even without downloading or sharing, viewing data unrelated to your work without authorization may already amount to misuse."
       },
       "reminder": {
         "zh-HK": "查看本身，就已經是使用資料。",
@@ -174,33 +209,81 @@
         "en": "Accounts and Identity"
       },
       "title": {
-        "zh-HK": "夜班交接時刻",
-        "zh-CN": "夜班交接时刻",
-        "en": "During Handover on a Night Shift"
+        "zh-HK": "實習第一日",
+        "zh-CN": "实习第一天",
+        "en": "First Day of Internship"
       },
       "story": {
         "zh-HK": {
           "label": "情境",
-          "title": "夜班交接時刻",
-          "content": [
-            "同事甲趕住離開，對你說：「我個帳號未 logout，你幫我順手查埋呢位服務使用者資料啦，快啲搞掂佢。」",
-            "你見到畫面已經開住，而且另一位同事都話：「都係幫手啫，唔使咁執著。」"
+          "title": "實習第一日",
+          "dialogues": [
+            {
+              "speaker": "前輩同事",
+              "avatar": "🧑‍💼",
+              "side": "left",
+              "text": "我趕住去開會，我個帳號仲開住，你幫我睇埋呢位服務使用者資料，快手搞掂佢啦。"
+            },
+            {
+              "speaker": "你",
+              "avatar": "🧑‍🎓",
+              "side": "right",
+              "text": "但我唔係用緊自己帳號，咁樣得唔得？"
+            },
+            {
+              "speaker": "另一位同事",
+              "avatar": "😅",
+              "side": "left",
+              "text": "都係幫手啫，大家忙緊，唔使咁執著啦。"
+            }
           ]
         },
         "zh-CN": {
           "label": "情境",
-          "title": "夜班交接时刻",
-          "content": [
-            "同事甲赶着离开，对你说：“我的账号还没 logout，你帮我顺手查一下这位服务使用者资料吧，快点处理完。”",
-            "你看到画面已经开着，而且另一位同事也说：“只是帮忙而已，不用那么执着。”"
+          "title": "实习第一天",
+          "dialogues": [
+            {
+              "speaker": "前辈同事",
+              "avatar": "🧑‍💼",
+              "side": "left",
+              "text": "我赶着去开会，我的账号还开着，你帮我看一下这位服务使用者资料，快点处理吧。"
+            },
+            {
+              "speaker": "你",
+              "avatar": "🧑‍🎓",
+              "side": "right",
+              "text": "但我不是用自己的账号，这样可以吗？"
+            },
+            {
+              "speaker": "另一位同事",
+              "avatar": "😅",
+              "side": "left",
+              "text": "只是帮个忙而已，大家都很忙，不用太执着。"
+            }
           ]
         },
         "en": {
           "label": "Scenario",
-          "title": "During Handover on a Night Shift",
-          "content": [
-            "A colleague is rushing to leave and says, “My account is still logged in. Please help me look up this service user’s record quickly before I go.”",
-            "The screen is already open, and another colleague adds, “You’re only helping. No need to be so strict.”"
+          "title": "First Day of Internship",
+          "dialogues": [
+            {
+              "speaker": "Senior colleague",
+              "avatar": "🧑‍💼",
+              "side": "left",
+              "text": "I’m rushing to a meeting and my account is still open. Please check this service user’s record for me and sort it out quickly."
+            },
+            {
+              "speaker": "You",
+              "avatar": "🧑‍🎓",
+              "side": "right",
+              "text": "But I’m not using my own account. Is that okay?"
+            },
+            {
+              "speaker": "Another colleague",
+              "avatar": "😅",
+              "side": "left",
+              "text": "You’re only helping. Everyone’s busy—no need to be so strict."
+            }
           ]
         }
       },
@@ -212,9 +295,9 @@
       "options": [
         {
           "text": {
-            "zh-HK": "既然畫面已開，而且只是幫忙，可以照做。",
-            "zh-CN": "既然画面已开，而且只是帮忙，可以照做。",
-            "en": "Since the screen is already open and you are only helping, it is acceptable to continue."
+            "zh-HK": "既然畫面已經開住，而且只是幫手，可以照做。",
+            "zh-CN": "既然画面已经开着，而且只是帮忙，可以照做。",
+            "en": "Since the screen is already open and you are only helping, it is fine to continue."
           },
           "correct": false
         },
@@ -228,8 +311,8 @@
         },
         {
           "text": {
-            "zh-HK": "只要事後向主管補充說明，就沒有問題。",
-            "zh-CN": "只要事后向主管补充说明，就没有问题。",
+            "zh-HK": "只要之後向主管補充說明，就無問題。",
+            "zh-CN": "只要之后向主管补充说明，就没有问题。",
             "en": "It is acceptable as long as you explain it to a supervisor afterwards."
           },
           "correct": false
@@ -246,7 +329,7 @@
       "explanation": {
         "zh-HK": "即使出於幫忙，使用他人帳號仍會破壞身份追蹤及審計紀錄，屬高風險行為。",
         "zh-CN": "即使出于帮忙，使用他人账号仍会破坏身份追踪及审计记录，属于高风险行为。",
-        "en": "Even if the intention is to help, using another person’s account breaks identity tracking and audit trails and is therefore high risk."
+        "en": "Even if the intention is to help, using another person’s account breaks identity tracking and audit trails and is therefore high-risk."
       },
       "reminder": {
         "zh-HK": "借帳號 = 借身份 = 借風險。",
@@ -265,33 +348,81 @@
         "en": "Off-site Data and Responsibility"
       },
       "title": {
-        "zh-HK": "看似方便，其實高風險",
-        "zh-CN": "看似方便，其实高风险",
-        "en": "Convenient on the Surface, Risky in Reality"
+        "zh-HK": "趕交差之下的陷阱",
+        "zh-CN": "赶任务时的陷阱",
+        "en": "The Trap of “Just Finishing the Task”"
       },
       "story": {
         "zh-HK": {
           "label": "情境",
-          "title": "趕工的下午",
-          "content": [
-            "你準備落班，但手頭仲有資料要整理。同事建議你先把資料下載到私人手提電腦，晚上回家再做。",
-            "另一位同事又說：「其實系統權限設置都有問題，見到就用啦，責任應該係 IT。」"
+          "title": "趕交差之下的陷阱",
+          "dialogues": [
+            {
+              "speaker": "同學義工",
+              "avatar": "📋",
+              "side": "left",
+              "text": "不如你先把資料下載到你部手提電腦，今晚返屋企再整理，咁就趕得切。"
+            },
+            {
+              "speaker": "你",
+              "avatar": "🧑‍💻",
+              "side": "right",
+              "text": "但我部機唔係機構裝置，而且呢啲資料都幾敏感。"
+            },
+            {
+              "speaker": "朋友",
+              "avatar": "🤷",
+              "side": "left",
+              "text": "如果系統畀你見到，其實都係 IT 設定問題啦，應該唔關你事。"
+            }
           ]
         },
         "zh-CN": {
           "label": "情境",
-          "title": "赶工的下午",
-          "content": [
-            "你准备下班，但手上还有资料要整理。同事建议你先把资料下载到私人手提电脑，晚上回家再做。",
-            "另一位同事又说：“其实系统权限设置也有问题，看得到就用吧，责任应该是 IT。”"
+          "title": "赶任务时的陷阱",
+          "dialogues": [
+            {
+              "speaker": "同学义工",
+              "avatar": "📋",
+              "side": "left",
+              "text": "不如你先把资料下载到你的手提电脑，今晚回家再整理，这样比较赶得及。"
+            },
+            {
+              "speaker": "你",
+              "avatar": "🧑‍💻",
+              "side": "right",
+              "text": "但我的电脑不是机构装置，而且这些资料也很敏感。"
+            },
+            {
+              "speaker": "朋友",
+              "avatar": "🤷",
+              "side": "left",
+              "text": "如果系统让你看得到，其实也是 IT 设置问题，应该不关你事。"
+            }
           ]
         },
         "en": {
           "label": "Scenario",
-          "title": "A Busy Afternoon",
-          "content": [
-            "You are about to finish work, but some data still needs to be organized. A colleague suggests downloading it to your personal laptop and finishing it at home that evening.",
-            "Another colleague adds, “The system permissions are poorly configured anyway. If you can see it, just use it—the responsibility should be on IT.”"
+          "title": "The Trap of “Just Finishing the Task”",
+          "dialogues": [
+            {
+              "speaker": "Student volunteer",
+              "avatar": "📋",
+              "side": "left",
+              "text": "Why don’t you download the data to your laptop and finish sorting it at home tonight? That way you’ll still make the deadline."
+            },
+            {
+              "speaker": "You",
+              "avatar": "🧑‍💻",
+              "side": "right",
+              "text": "But my laptop isn’t an approved device, and the data looks quite sensitive."
+            },
+            {
+              "speaker": "Friend",
+              "avatar": "🤷",
+              "side": "left",
+              "text": "If the system lets you see it, that’s really an IT setup problem. It shouldn’t be your responsibility."
+            }
           ]
         }
       },
@@ -311,7 +442,7 @@
         },
         {
           "text": {
-            "zh-HK": "如果完成後即刻刪除，就代表沒有問題。",
+            "zh-HK": "如果完成後即刻刪除，就代表無問題。",
             "zh-CN": "如果完成后立刻删除，就代表没有问题。",
             "en": "If the data is deleted immediately afterwards, there is no problem."
           },
@@ -327,16 +458,16 @@
         },
         {
           "text": {
-            "zh-HK": "只要責任在 IT，使用者就毋須再判斷自己應否取用資料。",
-            "zh-CN": "只要责任在 IT，使用者就无须再判断自己应否取用资料。",
+            "zh-HK": "只要責任喺 IT，使用者就唔使再判斷自己應否取用資料。",
+            "zh-CN": "只要责任在 IT，使用者就不用再判断自己应否取用资料。",
             "en": "If the issue started with IT, the user no longer needs to judge whether taking the data is appropriate."
           },
           "correct": false
         }
       ],
       "explanation": {
-        "zh-HK": "把資料帶離受控環境本身屬高風險；而系統設置失誤與個人濫用是兩回事，使用者仍需對自己的行為負責。",
-        "zh-CN": "把资料带离受控环境本身属于高风险；而系统设置失误与个人滥用是两回事，使用者仍需对自己的行为负责。",
+        "zh-HK": "把資料帶離受控環境本身已屬高風險；而系統設置失誤與個人濫用係兩回事，使用者仍需對自己的行為負責。",
+        "zh-CN": "把资料带离受控环境本身已属高风险；而系统设置失误与个人滥用是两回事，使用者仍需对自己的行为负责。",
         "en": "Taking data outside a controlled environment is itself high-risk. System misconfiguration and personal misuse are separate issues, and users still remain responsible for their own actions."
       },
       "reminder": {
@@ -361,9 +492,9 @@
         "en": "Which option is the most appropriate?"
       },
       "scenario": {
-        "zh-HK": "如果你的親友正在接受服務／治療，而你並非負責相關個案，以下哪一項最合適？",
-        "zh-CN": "如果你的亲友正在接受服务／治疗，而你并非负责相关个案，以下哪一项最合适？",
-        "en": "If a family member or friend is receiving care or services and you are not responsible for the case, which option is the most appropriate?"
+        "zh-HK": "如果你朋友正在使用某項服務，而你並非負責相關個案，以下哪一項最合適？",
+        "zh-CN": "如果你的朋友正在使用某项服务，而你并非负责相关个案，以下哪一项最合适？",
+        "en": "If your friend is receiving a service and you are not responsible for the case, which option is the most appropriate?"
       },
       "options": [
         {
@@ -392,15 +523,15 @@
         },
         {
           "text": {
-            "zh-HK": "如果親友口頭同意，就可以直接查看。",
-            "zh-CN": "如果亲友口头同意，就可以直接查看。",
-            "en": "If the person verbally agrees, you may directly view the record."
+            "zh-HK": "如果朋友口頭同意，就可以直接查看。",
+            "zh-CN": "如果朋友口头同意，就可以直接查看。",
+            "en": "If your friend verbally agrees, you may directly view the record."
           },
           "correct": false
         }
       ],
       "explanation": {
-        "zh-HK": "私人關係不等於工作需要。即使出發點是關心，只要不屬於你的職責範圍，就不應自行查閱。",
+        "zh-HK": "私人關係不等於工作需要。即使出發點是關心，只要唔屬於你嘅職責範圍，就唔應自行查閱。",
         "zh-CN": "私人关系不等于工作需要。即使出发点是关心，只要不属于你的职责范围，就不应自行查阅。",
         "en": "A personal relationship does not equal a work need. Even if the intention is concern, you should not access records outside your role."
       },
