@@ -44,6 +44,7 @@
       box-shadow: var(--shadow);
       position: relative;
       overflow: hidden;
+      transition: 0.2s ease;
     }
 
     .card::after {
@@ -489,6 +490,48 @@
       font-weight: bold;
     }
 
+    /* 完成頁模式：隱藏答題時期內容，直接聚焦結果 */
+    .card.final-mode .topbar,
+    .card.final-mode .hero-subtitle,
+    .card.final-mode .intro,
+    .card.final-mode .meta,
+    .card.final-mode .story-card,
+    .card.final-mode .question-type,
+    .card.final-mode .question-hint,
+    .card.final-mode #answers,
+    .card.final-mode #answerAction,
+    .card.final-mode #result,
+    .card.final-mode .summary {
+      display: none !important;
+    }
+
+    .card.final-mode #question {
+      display: none !important;
+    }
+
+    .card.final-mode .question-title {
+      margin-top: 4px;
+      margin-bottom: 12px;
+      font-size: 28px;
+    }
+
+    .card.final-mode #finalResult {
+      display: block !important;
+      margin-top: 8px;
+      max-width: 780px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .card.final-mode .controls {
+      justify-content: center;
+      margin-top: 18px;
+    }
+
+    .card.final-mode .nav-btn {
+      min-width: 180px;
+    }
+
     @media (max-width: 640px) {
       h1 {
         font-size: 28px;
@@ -525,11 +568,16 @@
       .nav-btn {
         width: 100%;
       }
+
+      .card.final-mode .nav-btn {
+        width: 100%;
+        min-width: 0;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="card">
+  <div class="card" id="quizCard">
     <div class="topbar">
       <div>
         <div class="badge" id="badge"></div>
@@ -728,6 +776,9 @@
       const box = document.getElementById("finalResult");
       if (!box) return;
 
+      document.getElementById("quizCard").classList.add("final-mode");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+
       showingFinal = true;
 
       document.getElementById("meta").innerHTML = "";
@@ -852,6 +903,7 @@
       const question = quizData.questions[current];
       if (!question) return;
 
+      document.getElementById("quizCard").classList.remove("final-mode");
       hideFinalResult();
       applyLanguageUI();
 
@@ -968,6 +1020,7 @@
       answersState = {};
       current = 0;
       showingFinal = false;
+      document.getElementById("quizCard").classList.remove("final-mode");
       renderQuestion();
     }
 
