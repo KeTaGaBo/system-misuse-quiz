@@ -6,16 +6,17 @@
   <title>Quiz</title>
   <style>
     :root {
-      --ink: #1e1e1e;
-      --bg: #fff8ee;
+      --ink: #1f1f1f;
+      --bg1: #fff9f0;
+      --bg2: #ffeecf;
       --card: #ffffff;
       --yellow: #ffd54f;
       --red: #ff6b6b;
       --blue: #5da9ff;
-      --green: #5ccf7a;
+      --green: #60d394;
       --purple: #9a7cff;
       --grey: #eef2f7;
-      --shadow: 0 8px 0 #1e1e1e;
+      --shadow: 0 8px 0 #1f1f1f;
       --radius: 18px;
     }
 
@@ -26,8 +27,8 @@
     body {
       font-family: Arial, sans-serif;
       background:
-        radial-gradient(circle at 20% 20%, #fff1b8 0, #fff1b8 2px, transparent 2px) 0 0 / 22px 22px,
-        linear-gradient(180deg, #fff9f0, #fff3df);
+        radial-gradient(circle at 15% 20%, rgba(255, 213, 79, 0.35) 0, rgba(255, 213, 79, 0.35) 3px, transparent 3px) 0 0 / 24px 24px,
+        linear-gradient(180deg, var(--bg1), var(--bg2));
       margin: 0;
       padding: 20px;
       color: var(--ink);
@@ -37,7 +38,7 @@
       background: var(--card);
       padding: 28px;
       border-radius: var(--radius);
-      max-width: 920px;
+      max-width: 960px;
       margin: 24px auto;
       border: 3px solid var(--ink);
       box-shadow: var(--shadow);
@@ -52,7 +53,7 @@
       top: -40px;
       width: 180px;
       height: 180px;
-      background: radial-gradient(circle, rgba(255, 213, 79, 0.24) 0%, rgba(255, 213, 79, 0.08) 45%, rgba(255,255,255,0) 70%);
+      background: radial-gradient(circle, rgba(255, 213, 79, 0.22) 0%, rgba(255, 213, 79, 0.07) 45%, rgba(255,255,255,0) 70%);
       pointer-events: none;
     }
 
@@ -80,6 +81,8 @@
 
     .lang-box {
       text-align: right;
+      position: relative;
+      z-index: 2;
     }
 
     .lang-label {
@@ -98,13 +101,6 @@
       box-shadow: 2px 2px 0 var(--ink);
     }
 
-    h1 {
-      margin: 0 0 12px 0;
-      font-size: 34px;
-      line-height: 1.15;
-      letter-spacing: 0.3px;
-    }
-
     .hero-subtitle {
       display: inline-block;
       background: #fff;
@@ -117,11 +113,22 @@
       color: #444;
     }
 
+    h1 {
+      margin: 0 0 12px 0;
+      font-size: 34px;
+      line-height: 1.12;
+      letter-spacing: 0.3px;
+      position: relative;
+      z-index: 2;
+    }
+
     .intro {
       font-size: 16px;
       line-height: 1.75;
       color: #555;
       margin-bottom: 24px;
+      position: relative;
+      z-index: 2;
     }
 
     .meta {
@@ -154,14 +161,6 @@
       position: relative;
     }
 
-    .story-card::before {
-      content: "💬";
-      position: absolute;
-      right: 12px;
-      top: 10px;
-      font-size: 22px;
-    }
-
     .story-label {
       display: inline-block;
       font-size: 13px;
@@ -178,17 +177,80 @@
     .story-title {
       font-size: 22px;
       font-weight: bold;
-      margin-bottom: 10px;
+      margin-bottom: 14px;
     }
 
-    .story-line {
-      line-height: 1.8;
-      margin-bottom: 8px;
-      color: #333;
+    .dialogue-wrap {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .dialogue-wrap.right {
+      flex-direction: row-reverse;
+    }
+
+    .avatar {
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      border-radius: 50%;
+      border: 3px solid var(--ink);
       background: #fff;
-      border: 2px solid #d9e2ef;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 3px 3px 0 var(--ink);
+    }
+
+    .bubble {
+      max-width: calc(100% - 60px);
+      background: #fff;
+      border: 3px solid var(--ink);
+      border-radius: 16px;
       padding: 10px 12px;
-      border-radius: 12px;
+      box-shadow: 3px 3px 0 var(--ink);
+      position: relative;
+    }
+
+    .dialogue-wrap.left .bubble::before {
+      content: "";
+      position: absolute;
+      left: -10px;
+      top: 14px;
+      width: 14px;
+      height: 14px;
+      background: #fff;
+      border-left: 3px solid var(--ink);
+      border-bottom: 3px solid var(--ink);
+      transform: rotate(45deg);
+    }
+
+    .dialogue-wrap.right .bubble::before {
+      content: "";
+      position: absolute;
+      right: -10px;
+      top: 14px;
+      width: 14px;
+      height: 14px;
+      background: #fff;
+      border-right: 3px solid var(--ink);
+      border-top: 3px solid var(--ink);
+      transform: rotate(45deg);
+    }
+
+    .speaker {
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 6px;
+      color: #4b5563;
+    }
+
+    .bubble-text {
+      line-height: 1.75;
+      color: #333;
     }
 
     .question-type {
@@ -427,7 +489,7 @@
       font-weight: bold;
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 640px) {
       h1 {
         font-size: 28px;
       }
@@ -450,6 +512,10 @@
 
       .story-title {
         font-size: 20px;
+      }
+
+      .bubble {
+        max-width: calc(100% - 54px);
       }
 
       .controls {
@@ -479,7 +545,7 @@
       </div>
     </div>
 
-    <div class="hero-subtitle" id="heroSubtitle">⚠️ 真實案例改編 × 漫畫式互動學習</div>
+    <div class="hero-subtitle" id="heroSubtitle"></div>
     <h1 id="siteTitle"></h1>
     <div class="intro" id="intro"></div>
 
@@ -521,77 +587,6 @@
     let answersState = {};
     let showingFinal = false;
 
-    const LOCAL_UI = {
-      "zh-HK": {
-        heroSubtitle: "⚠️ 真實案例改編 × 漫畫式互動學習",
-        answerBeforeNext: "請先回答這一題，才可進入下一題。",
-        levelLabel: "結果級別",
-        levels: {
-          perfect: "🛡️ 資料守護者",
-          pass70: "🔎 風險偵察員",
-          below70: "🌱 界線再學習者"
-        },
-        shareTitle: "📢 覺得有用？分享畀朋友試下！",
-        shareText: "你可以把這個小測驗分享給同事、親友或青少年，看看大家會不會在「看似無傷大雅」的情境下都作出同一判斷。",
-        copyLink: "複製連結",
-        copied: "✅ 已複製連結，快啲分享出去！"
-      },
-      "zh-CN": {
-        heroSubtitle: "⚠️ 真实案例改编 × 漫画式互动学习",
-        answerBeforeNext: "请先回答这一题，才可进入下一题。",
-        levelLabel: "结果级别",
-        levels: {
-          perfect: "🛡️ 资料守护者",
-          pass70: "🔎 风险侦察员",
-          below70: "🌱 界线再学习者"
-        },
-        shareTitle: "📢 觉得有用？分享给朋友试试看！",
-        shareText: "你可以把这个小测验分享给同事、亲友或青少年，看看大家会不会在“看似无伤大雅”的情境下都作出同一判断。",
-        copyLink: "复制链接",
-        copied: "✅ 链接已复制，快去分享吧！"
-      },
-      "en": {
-        heroSubtitle: "⚠️ Real Cases × Comic-style Interactive Learning",
-        answerBeforeNext: "Please answer this question before moving to the next one.",
-        levelLabel: "Result Level",
-        levels: {
-          perfect: "🛡️ Data Guardian",
-          pass70: "🔎 Risk Spotter",
-          below70: "🌱 Boundary Learner"
-        },
-        shareTitle: "📢 Found this useful? Share it with others!",
-        shareText: "You can share this quiz with colleagues, friends, family members, or teenagers and see whether they make the same judgment in situations that look harmless on the surface.",
-        copyLink: "Copy Link",
-        copied: "✅ Link copied. Share it now!"
-      }
-    };
-
-    function getLocalText(key) {
-      return LOCAL_UI[currentLang][key];
-    }
-
-    function getScore() {
-      if (!quizData) return 0;
-      let score = 0;
-
-      quizData.questions.forEach(q => {
-        const state = answersState[q.id];
-        if (state && state.submitted && isAnswerCorrect(q, state.selected)) {
-          score++;
-        }
-      });
-
-      return score;
-    }
-
-    function getAnsweredCount() {
-      return Object.values(answersState).filter(s => s && s.submitted).length;
-    }
-
-    function allAnswered() {
-      return quizData && getAnsweredCount() === quizData.questions.length;
-    }
-
     function getUIText(key) {
       return quizData.ui[currentLang][key];
     }
@@ -632,6 +627,26 @@
       return arraysEqual(selectedIndexes, correctIndexes);
     }
 
+    function getScore() {
+      if (!quizData) return 0;
+      let score = 0;
+      quizData.questions.forEach(q => {
+        const state = answersState[q.id];
+        if (state && state.submitted && isAnswerCorrect(q, state.selected)) {
+          score++;
+        }
+      });
+      return score;
+    }
+
+    function getAnsweredCount() {
+      return Object.values(answersState).filter(s => s && s.submitted).length;
+    }
+
+    function allAnswered() {
+      return quizData && getAnsweredCount() === quizData.questions.length;
+    }
+
     function applyLanguageUI() {
       const ui = quizData.ui[currentLang];
       document.title = ui.siteTitle;
@@ -639,13 +654,13 @@
 
       document.getElementById("badge").innerText = ui.badge;
       document.getElementById("siteTitle").innerText = ui.siteTitle;
+      document.getElementById("heroSubtitle").innerText = ui.heroSubtitle;
       document.getElementById("intro").innerText = ui.intro;
       document.getElementById("nextBtn").innerText = ui.next;
       document.getElementById("footer").innerText = ui.footer;
       document.getElementById("langSelect").value = currentLang;
       document.getElementById("langLabel").innerText = ui.langLabel || "Language / 語言 / 语言";
       document.getElementById("checkBtn").innerText = ui.checkAnswer;
-      document.getElementById("heroSubtitle").innerText = getLocalText("heroSubtitle");
     }
 
     function updateSummary() {
@@ -687,26 +702,24 @@
       const total = quizData.questions.length;
       const score = getScore();
       const ratio = score / total;
-
       if (score === total) return "perfect";
       if (ratio >= 0.7) return "pass70";
       return "below70";
     }
 
     function getEncouragementMessage() {
-      const levelKey = getLevelKey();
-      return quizData.messages[levelKey][currentLang];
+      return quizData.messages[getLevelKey()][currentLang];
     }
 
     function renderShareSection() {
       return `
         <div class="share-box">
-          <div class="share-title">${getLocalText("shareTitle")}</div>
-          <div class="share-text">${getLocalText("shareText")}</div>
+          <div class="share-title">${getUIText("shareTitle")}</div>
+          <div class="share-text">${getUIText("shareText")}</div>
           <div class="share-actions">
-            <button class="share-btn" onclick="copyQuizLink()">${getLocalText("copyLink")}</button>
+            <button class="share-btn" onclick="copyQuizLink()">${getUIText("copyLink")}</button>
           </div>
-          <div class="copy-msg" id="copyMsg">${getLocalText("copied")}</div>
+          <div class="copy-msg" id="copyMsg">${getUIText("copied")}</div>
         </div>
       `;
     }
@@ -731,13 +744,13 @@
       const score = getScore();
       const scorePercent = Math.round((score / total) * 100);
       const levelKey = getLevelKey();
-      const levelName = getLocalText("levels")[levelKey];
+      const levelName = getUIText("levels")[levelKey];
 
       box.className = "result info";
       box.innerHTML = `
         <strong>${getUIText("resultTitle")}</strong><br>
         ${getUIText("scoreLabel")}：${score} / ${total} (${scorePercent}%)<br>
-        <div class="level-badge">${getLocalText("levelLabel")}：${levelName}</div>
+        <div class="level-badge">${getUIText("levelLabel")}：${levelName}</div>
         <div>${getEncouragementMessage()}</div>
         ${renderShareSection()}
       `;
@@ -790,10 +803,38 @@
         const storyContentBox = document.getElementById("storyContent");
         storyContentBox.innerHTML = "";
 
-        if (Array.isArray(story.content)) {
+        if (Array.isArray(story.dialogues)) {
+          story.dialogues.forEach(item => {
+            const wrap = document.createElement("div");
+            wrap.className = `dialogue-wrap ${item.side === "right" ? "right" : "left"}`;
+
+            const avatar = document.createElement("div");
+            avatar.className = "avatar";
+            avatar.textContent = item.avatar || "🙂";
+
+            const bubble = document.createElement("div");
+            bubble.className = "bubble";
+
+            const speaker = document.createElement("div");
+            speaker.className = "speaker";
+            speaker.textContent = item.speaker || "";
+
+            const text = document.createElement("div");
+            text.className = "bubble-text";
+            text.textContent = item.text || "";
+
+            bubble.appendChild(speaker);
+            bubble.appendChild(text);
+
+            wrap.appendChild(avatar);
+            wrap.appendChild(bubble);
+
+            storyContentBox.appendChild(wrap);
+          });
+        } else if (Array.isArray(story.content)) {
           story.content.forEach(line => {
             const div = document.createElement("div");
-            div.className = "story-line";
+            div.className = "bubble-text";
             div.textContent = line;
             storyContentBox.appendChild(div);
           });
@@ -942,7 +983,7 @@
       const state = getQuestionState(question.id);
 
       if (!state.submitted) {
-        alert(getLocalText("answerBeforeNext"));
+        alert(getUIText("answerBeforeNext"));
         return;
       }
 
