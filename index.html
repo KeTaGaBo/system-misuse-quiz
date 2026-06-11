@@ -17,7 +17,7 @@
       background: white;
       padding: 28px;
       border-radius: 16px;
-      max-width: 760px;
+      max-width: 780px;
       margin: 30px auto;
       box-shadow: 0 4px 18px rgba(0,0,0,0.08);
     }
@@ -99,6 +99,7 @@
       cursor: pointer;
       font-size: 18px;
       transition: 0.2s ease;
+      text-align: center;
     }
 
     .option-btn:hover {
@@ -116,18 +117,28 @@
       border-radius: 10px;
       line-height: 1.8;
       font-size: 16px;
+      display: none;
     }
 
     .correct {
       background: #d4edda;
       color: #155724;
       border: 1px solid #b7dfbf;
+      display: block;
     }
 
     .wrong {
       background: #f8d7da;
       color: #721c24;
       border: 1px solid #efb5ba;
+      display: block;
+    }
+
+    .info {
+      background: #e8f4fd;
+      color: #0c5460;
+      border: 1px solid #b8daff;
+      display: block;
     }
 
     .reminder {
@@ -218,7 +229,7 @@
       </div>
 
       <div class="lang-box">
-        <div class="lang-label">Language / 語言 / 语言</div>
+        <div class="lang-label" id="langLabel">Language / 語言 / 语言</div>
         <select id="langSelect">
           <option value="zh-HK">繁體中文</option>
           <option value="zh-CN">简体中文</option>
@@ -235,7 +246,7 @@
     <div class="scenario" id="question"></div>
 
     <div id="answers"></div>
-    <div id="result"></div>
+    <div id="result" class="result"></div>
 
     <div class="controls">
       <button class="nav-btn secondary" id="prevBtn"></button>
@@ -243,239 +254,307 @@
     </div>
 
     <div class="summary" id="summary"></div>
+    <div id="finalResult" class="result"></div>
+
     <div class="footer-note" id="footer"></div>
   </div>
 
-<script>
-  let quizData = null;
-  let currentLang = "zh-HK";
-  let current = 0;
-  let answeredSelections = {};
+  <script>
+    let quizData = null;
+    let currentLang = "zh-HK";
+    let current = 0;
+    let answeredSelections = {};
+    let showingFinal = false;
 
-  function getScore() {
-    if (!quizData) return 0;
-    let score = 0;
-    quizData.questions.forEach(q => {
-      const sel = answeredSelections[q.id];
-      if (sel !== undefined && q.options[sel] && q.options[sel].correct) {
-        score++;
-      }
-    });
-    return score;
-  }
-
-  function getAnsweredCount() {
-    return Object.keys(answeredSelections).length;
-  }
-
-  function allAnswered() {
-    return quizData && getAnsweredCount() === quizData.questions.length;
-  }
-
-  function getUIText(key) {
-    return quizData.ui[currentLang][key];
-  }
-
-  function updateLanguageInUrl(lang) {
-    const url = new URL(window.location);
-    url.searchParams.set("lang", lang);
-    window.history.replaceState({}, "", url);
-  }
-
-  function applyLanguageUI() {
-    const ui = quizData.ui[currentLang];
-    document.title = ui.siteTitle;
-    document.documentElement.lang = currentLang;
-
-    document.getElementById("badge").innerText = ui.badge;
-    document.getElementById("siteTitle").innerText = ui.siteTitle;
-    document.getElementById("intro").innerText = ui.intro;
-    document.getElementById("prevBtn").innerText = ui.prev;
-    document.getElementById("nextBtn").innerText = allAnswered() ? ui.finish : ui.next;
-    document.getElementById("footer").innerText = ui.footer;
-    document.getElementById("langSelect").value = currentLang;
-  }
-
-  function getEncouragementMessage() {
-    const total = quizData.questions.length;
-    const score = getScore();
-    const ratio = score / total;
-
-    if (score === total) {
-      return quizData.messages.perfect[currentLang];
-    } else if (ratio >= 0.7) {
-      return quizData.messages.pass70[currentLang];
-    } else {
-      return quizData.messages.below70[currentLang];
-    }
-  }
-
-  function showFinalResult() {
-    const total = quizData.questions.length;
-    const score = getScore();
-    const scorePercent = Math.round((score / total) * 100);
-
-    const box = document.getElementById("finalResult");
-    box.style.display = "block";
-    box.className = "result correct";
-    box.innerHTML = `
-      <strong>${getUIText("resultTitle")}</strong><br>
-      ${getUIText("scoreLabel")}：${score} / ${total} (${scorePercent}%)<br><br>
-      ${getEncouragementMessage()}
-    `;
-  }
-
-  function hideFinalResult() {
-    const box = document.getElementById("finalResult");
-    box.style.display = "none";
-    box.innerHTML = "";
-  }
-
-  function renderQuestion() {
-    const q = quizData.questions[current];
-    if (!q) return;
-
-    applyLanguageUI();
-    hideFinalResult();
-
-    const questionLabel = getUIText("questionLabel")
-      .replace("{current}", current + 1)
-      .replace("{total}", quizData.questions.length);
-
-    document.getElementById("meta").innerHTML = `${questionLabel} ・ ${q.category[currentLang]}`;
-    document.getElementById("title").innerHTML = q.title[currentLang];
-    document.getElementById("question").innerHTML = q.scenario[currentLang];
-
-    const resultBox = document.getElementById("result");
-    resultBox.innerHTML = "";
-    resultBox.className = "result";
-
-    const score = getScore();
-    document.getElementById("summary").innerHTML = `${getUIText("scoreLabel")}：${score} / ${quizData.questions.length}`;
-
-    let html = "";
-    const alreadyAnswered = answeredSelections[q.id] !== undefined;
-
-    q.options.forEach((opt, i) => {
-      html += `
-        <button class="option-btn" onclick="checkAnswer(${i})" ${alreadyAnswered ? "disabled" : ""}>
-          ${opt.text[currentLang]}
-        </button>`;
-    });
-
-    document.getElementById("answers").innerHTML = html;
-
-    if (alreadyAnswered) {
-      showResult(q, answeredSelections[q.id]);
-    }
-  }
-
-  function disableCurrentOptions() {
-    const buttons = document.querySelectorAll("#answers .option-btn");
-    buttons.forEach(btn => btn.disabled = true);
-  }
-
-  function showResult(q, selectedIndex) {
-    const selected = q.options[selectedIndex];
-    const resultBox = document.getElementById("result");
-
-    if (selected.correct) {
-      resultBox.className = "result correct";
-      resultBox.innerHTML = `
-        ${getUIText("correctLabel")}<br>
-        ${q.explanation[currentLang]}
-        <div class="reminder">${getUIText("reminderLabel")}：${q.reminder[currentLang]}</div>
-      `;
-    } else {
-      resultBox.className = "result wrong";
-      resultBox.innerHTML = `
-        ${getUIText("wrongLabel")}<br>
-        ${q.explanation[currentLang]}
-        <div class="reminder">${getUIText("reminderLabel")}：${q.reminder[currentLang]}</div>
-      `;
-    }
-  }
-
-  function checkAnswer(index) {
-    const q = quizData.questions[current];
-    if (answeredSelections[q.id] !== undefined) return;
-
-    answeredSelections[q.id] = index;
-
-    showResult(q, index);
-    disableCurrentOptions();
-
-    const score = getScore();
-    document.getElementById("summary").innerHTML = `${getUIText("scoreLabel")}：${score} / ${quizData.questions.length}`;
-
-    if (allAnswered()) {
-      document.getElementById("nextBtn").innerText = getUIText("finish");
-    }
-  }
-
-  function nextQuestion() {
-    if (!quizData) return;
-
-    if (allAnswered() && current === quizData.questions.length - 1) {
-      showFinalResult();
-      return;
+    function getScore() {
+      if (!quizData) return 0;
+      let score = 0;
+      quizData.questions.forEach(q => {
+        const sel = answeredSelections[q.id];
+        if (sel !== undefined && q.options[sel] && q.options[sel].correct) {
+          score++;
+        }
+      });
+      return score;
     }
 
-    if (current < quizData.questions.length - 1) {
-      current++;
-      renderQuestion();
-    } else {
-      showFinalResult();
+    function getAnsweredCount() {
+      return Object.keys(answeredSelections).length;
     }
-  }
 
-  function prevQuestion() {
-    if (!quizData) return;
-
-    if (current > 0) {
-      current--;
-      renderQuestion();
-    } else {
-      current = quizData.questions.length - 1;
-      renderQuestion();
+    function allAnswered() {
+      return quizData && getAnsweredCount() === quizData.questions.length;
     }
-  }
 
-  async function loadQuestions() {
-    try {
-      const response = await fetch("questions.json");
-      quizData = await response.json();
+    function getUIText(key) {
+      return quizData.ui[currentLang][key];
+    }
 
-      const urlLang = new URLSearchParams(window.location.search).get("lang");
-      const supported = ["zh-HK", "zh-CN", "en"];
+    function updateLanguageInUrl(lang) {
+      const url = new URL(window.location);
+      url.searchParams.set("lang", lang);
+      window.history.replaceState({}, "", url);
+    }
 
-      if (supported.includes(urlLang)) {
-        currentLang = urlLang;
+    function applyLanguageUI() {
+      const ui = quizData.ui[currentLang];
+      document.title = ui.siteTitle;
+      document.documentElement.lang = currentLang;
+
+      document.getElementById("badge").innerText = ui.badge;
+      document.getElementById("siteTitle").innerText = ui.siteTitle;
+      document.getElementById("intro").innerText = ui.intro;
+      document.getElementById("prevBtn").innerText = ui.prev;
+      document.getElementById("nextBtn").innerText = ui.next;
+      document.getElementById("footer").innerText = ui.footer;
+      document.getElementById("langSelect").value = currentLang;
+      document.getElementById("langLabel").innerText = ui.langLabel || "Language / 語言 / 语言";
+    }
+
+    function updateSummary() {
+      const score = getScore();
+      document.getElementById("summary").innerHTML = `${getUIText("scoreLabel")}：${score} / ${quizData.questions.length}`;
+    }
+
+    function hideResult() {
+      const box = document.getElementById("result");
+      box.className = "result";
+      box.innerHTML = "";
+      box.style.display = "none";
+    }
+
+    function showResult(q, selectedIndex) {
+      const selected = q.options[selectedIndex];
+      const resultBox = document.getElementById("result");
+
+      if (selected.correct) {
+        resultBox.className = "result correct";
+        resultBox.innerHTML = `
+          ${getUIText("correctLabel")}<br>
+          ${q.explanation[currentLang]}
+          <div class="reminder">${getUIText("reminderLabel")}：${q.reminder[currentLang]}</div>
+        `;
+      } else {
+        resultBox.className = "result wrong";
+        resultBox.innerHTML = `
+          ${getUIText("wrongLabel")}<br>
+          ${q.explanation[currentLang]}
+          <div class="reminder">${getUIText("reminderLabel")}：${q.reminder[currentLang]}</div>
+        `;
       }
 
-      renderQuestion();
-    } catch (error) {
-      document.body.innerHTML = `<div class="card"><div class="result wrong">❌ Failed to load quiz</div></div>`;
-      console.error(error);
+      resultBox.style.display = "block";
     }
-  }
 
-  document.getElementById("langSelect").addEventListener("change", function () {
-    currentLang = this.value;
-    updateLanguageInUrl(currentLang);
+    function disableCurrentOptions() {
+      const buttons = document.querySelectorAll("#answers .option-btn");
+      buttons.forEach(btn => btn.disabled = true);
+    }
 
-    if (allAnswered() && document.getElementById("finalResult").style.display === "block") {
+    function enableCurrentOptions() {
+      const buttons = document.querySelectorAll("#answers .option-btn");
+      buttons.forEach(btn => btn.disabled = false);
+    }
+
+    function getEncouragementMessage() {
+      const total = quizData.questions.length;
+      const score = getScore();
+      const ratio = score / total;
+
+      if (score === total) {
+        return quizData.messages.perfect[currentLang];
+      } else if (ratio >= 0.7) {
+        return quizData.messages.pass70[currentLang];
+      } else {
+        return quizData.messages.below70[currentLang];
+      }
+    }
+
+    function showFinalResult() {
+      const box = document.getElementById("finalResult");
+      if (!box) return;
+
+      showingFinal = true;
+
+      document.getElementById("meta").innerHTML = "";
+      document.getElementById("title").innerHTML = getUIText("resultTitle");
+      document.getElementById("question").innerHTML = "";
+      document.getElementById("answers").innerHTML = "";
+      hideResult();
+
+      const total = quizData.questions.length;
+      const score = getScore();
+      const scorePercent = Math.round((score / total) * 100);
+
+      box.className = "result info";
+      box.innerHTML = `
+        <strong>${getUIText("resultTitle")}</strong><br>
+        ${getUIText("scoreLabel")}：${score} / ${total} (${scorePercent}%)<br><br>
+        ${getEncouragementMessage()}
+      `;
+      box.style.display = "block";
+
+      document.getElementById("prevBtn").innerText = getUIText("restart");
+      document.getElementById("nextBtn").innerText = getUIText("restart");
+      updateSummary();
+    }
+
+    function hideFinalResult() {
+      const box = document.getElementById("finalResult");
+      if (!box) return;
+
+      box.className = "result";
+      box.innerHTML = "";
+      box.style.display = "none";
+      showingFinal = false;
+    }
+
+    function renderQuestion() {
+      const q = quizData.questions[current];
+      if (!q) return;
+
+      hideFinalResult();
       applyLanguageUI();
-      showFinalResult();
-    } else {
+
+      const questionLabel = getUIText("questionLabel")
+        .replace("{current}", current + 1)
+        .replace("{total}", quizData.questions.length);
+
+      document.getElementById("meta").innerHTML = `${questionLabel} ・ ${q.category[currentLang]}`;
+      document.getElementById("title").innerHTML = q.title[currentLang];
+      document.getElementById("question").innerHTML = q.scenario[currentLang];
+
+      const alreadyAnswered = answeredSelections[q.id] !== undefined;
+
+      let html = "";
+      q.options.forEach((opt, i) => {
+        html += `
+          <button class="option-btn" onclick="checkAnswer(${i})" ${alreadyAnswered ? "disabled" : ""}>
+            ${opt.text[currentLang]}
+          </button>
+        `;
+      });
+      document.getElementById("answers").innerHTML = html;
+
+      if (alreadyAnswered) {
+        showResult(q, answeredSelections[q.id]);
+        disableCurrentOptions();
+      } else {
+        hideResult();
+        enableCurrentOptions();
+      }
+
+      updateSummary();
+    }
+
+    function checkAnswer(index) {
+      const q = quizData.questions[current];
+      if (answeredSelections[q.id] !== undefined) return;
+
+      answeredSelections[q.id] = index;
+      showResult(q, index);
+      disableCurrentOptions();
+      updateSummary();
+
+      if (allAnswered()) {
+        document.getElementById("nextBtn").innerText = getUIText("finish");
+      }
+    }
+
+    function restartQuiz() {
+      answeredSelections = {};
+      current = 0;
+      showingFinal = false;
       renderQuestion();
     }
-  });
 
-  document.getElementById("nextBtn").addEventListener("click", nextQuestion);
-  document.getElementById("prevBtn").addEventListener("click", prevQuestion);
+    function nextQuestion() {
+      if (!quizData) return;
 
-  loadQuestions();
-</script>
+      if (showingFinal) {
+        restartQuiz();
+        return;
+      }
+
+      if (allAnswered() && current === quizData.questions.length - 1) {
+        showFinalResult();
+        return;
+      }
+
+      if (current < quizData.questions.length - 1) {
+        current++;
+        renderQuestion();
+      } else {
+        if (allAnswered()) {
+          showFinalResult();
+        } else {
+          current = 0;
+          renderQuestion();
+        }
+      }
+    }
+
+    function prevQuestion() {
+      if (!quizData) return;
+
+      if (showingFinal) {
+        restartQuiz();
+        return;
+      }
+
+      if (current > 0) {
+        current--;
+      } else {
+        current = quizData.questions.length - 1;
+      }
+
+      renderQuestion();
+    }
+
+    async function loadQuestions() {
+      try {
+        const response = await fetch("questions.json");
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        quizData = await response.json();
+
+        const urlLang = new URLSearchParams(window.location.search).get("lang");
+        const supported = ["zh-HK", "zh-CN", "en"];
+        if (supported.includes(urlLang)) {
+          currentLang = urlLang;
+        }
+
+        renderQuestion();
+      } catch (error) {
+        document.body.innerHTML = `
+          <div class="card">
+            <div class="result wrong" style="display:block;">
+              ❌ Failed to load quiz<br><br>
+              <small>${error.message}</small>
+            </div>
+          </div>`;
+        console.error(error);
+      }
+    }
+
+    document.getElementById("langSelect").addEventListener("change", function () {
+      currentLang = this.value;
+      updateLanguageInUrl(currentLang);
+
+      if (showingFinal) {
+        applyLanguageUI();
+        showFinalResult();
+      } else {
+        renderQuestion();
+      }
+    });
+
+    document.getElementById("nextBtn").addEventListener("click", nextQuestion);
+    document.getElementById("prevBtn").addEventListener("click", prevQuestion);
+
+    loadQuestions();
+  </script>
 </body>
 </html>
