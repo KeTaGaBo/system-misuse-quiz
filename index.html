@@ -264,6 +264,14 @@
     return score;
   }
 
+  function getAnsweredCount() {
+    return Object.keys(answeredSelections).length;
+  }
+
+  function allAnswered() {
+    return quizData && getAnsweredCount() === quizData.questions.length;
+  }
+
   function getUIText(key) {
     return quizData.ui[currentLang][key];
   }
@@ -283,9 +291,44 @@
     document.getElementById("siteTitle").innerText = ui.siteTitle;
     document.getElementById("intro").innerText = ui.intro;
     document.getElementById("prevBtn").innerText = ui.prev;
-    document.getElementById("nextBtn").innerText = ui.next;
+    document.getElementById("nextBtn").innerText = allAnswered() ? ui.finish : ui.next;
     document.getElementById("footer").innerText = ui.footer;
     document.getElementById("langSelect").value = currentLang;
+  }
+
+  function getEncouragementMessage() {
+    const total = quizData.questions.length;
+    const score = getScore();
+    const ratio = score / total;
+
+    if (score === total) {
+      return quizData.messages.perfect[currentLang];
+    } else if (ratio >= 0.7) {
+      return quizData.messages.pass70[currentLang];
+    } else {
+      return quizData.messages.below70[currentLang];
+    }
+  }
+
+  function showFinalResult() {
+    const total = quizData.questions.length;
+    const score = getScore();
+    const scorePercent = Math.round((score / total) * 100);
+
+    const box = document.getElementById("finalResult");
+    box.style.display = "block";
+    box.className = "result correct";
+    box.innerHTML = `
+      <strong>${getUIText("resultTitle")}</strong><br>
+      ${getUIText("scoreLabel")}：${score} / ${total} (${scorePercent}%)<br><br>
+      ${getEncouragementMessage()}
+    `;
+  }
+
+  function hideFinalResult() {
+    const box = document.getElementById("finalResult");
+    box.style.display = "none";
+    box.innerHTML = "";
   }
 
   function renderQuestion() {
@@ -293,6 +336,7 @@
     if (!q) return;
 
     applyLanguageUI();
+    hideFinalResult();
 
     const questionLabel = getUIText("questionLabel")
       .replace("{current}", current + 1)
@@ -363,18 +407,38 @@
 
     const score = getScore();
     document.getElementById("summary").innerHTML = `${getUIText("scoreLabel")}：${score} / ${quizData.questions.length}`;
+
+    if (allAnswered()) {
+      document.getElementById("nextBtn").innerText = getUIText("finish");
+    }
   }
 
   function nextQuestion() {
     if (!quizData) return;
-    current = (current < quizData.questions.length - 1) ? current + 1 : 0;
-    renderQuestion();
+
+    if (allAnswered() && current === quizData.questions.length - 1) {
+      showFinalResult();
+      return;
+    }
+
+    if (current < quizData.questions.length - 1) {
+      current++;
+      renderQuestion();
+    } else {
+      showFinalResult();
+    }
   }
 
   function prevQuestion() {
     if (!quizData) return;
-    current = (current > 0) ? current - 1 : quizData.questions.length - 1;
-    renderQuestion();
+
+    if (current > 0) {
+      current--;
+      renderQuestion();
+    } else {
+      current = quizData.questions.length - 1;
+      renderQuestion();
+    }
   }
 
   async function loadQuestions() {
@@ -399,7 +463,13 @@
   document.getElementById("langSelect").addEventListener("change", function () {
     currentLang = this.value;
     updateLanguageInUrl(currentLang);
-    renderQuestion();
+
+    if (allAnswered() && document.getElementById("finalResult").style.display === "block") {
+      applyLanguageUI();
+      showFinalResult();
+    } else {
+      renderQuestion();
+    }
   });
 
   document.getElementById("nextBtn").addEventListener("click", nextQuestion);
