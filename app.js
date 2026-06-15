@@ -69,9 +69,10 @@ function isAnswerCorrect(question, selectedIndexes) {
   });
 
   if (selectedIndexes.length !== correctIndexes.length) return false;
-  
+
   const sortedSelected = selectedIndexes.map(num => Number(num)).sort((a, b) => a - b);
   const sortedCorrect = correctIndexes.map(num => Number(num)).sort((a, b) => a - b);
+
   return sortedSelected.every((value, index) => value === sortedCorrect[index]);
 }
 
