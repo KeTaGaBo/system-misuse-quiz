@@ -3,7 +3,6 @@ let currentLang = "zh-HK";
 let current = 0;
 let answersState = {};
 let showingFinal = false;
-let qrCodeInstance = null; // 用來儲存 QR Code 物件
 
 function getUIText(key) {
   return quizData.ui[currentLang][key];
@@ -25,460 +24,302 @@ function getQuestionState(questionId) {
   return answersState[questionId];
 }
 
-/* 一鍵生成圖片大引擎 */
-function generateCertificateImage() {
-  const score = getScore();
-  const total = quizData.questions.length;
-  const levelKey = getLevelKey();
-  
-  // 1. 同步資料到隱藏的 HTML 繪圖模板
-  document.getElementById("certSiteTitle").innerText = getUIText("siteTitle");
-  document.getElementById("certScoreLabel").innerText = getUIText("scoreLabel");
-  document.getElementById("certScoreVal").innerText = `${score} / ${total}`;
-  document.getElementById("certMsgVal").innerText = getEncouragementMessage();
-  
-  const levelText = getUIText("levels")[levelKey] || "";
-  const parts = levelText.trim().split(" ");
-  document.getElementById("certLevelIcon").innerText = parts[0] || "🏅";
-  document.getElementById("certLevelText").innerText = getUIText("levelLabel") + "：" + (parts.slice(1).join(" ") || levelText);
+function shareWhatsApp() {
+  const url = window.location.origin + window.location.pathname + "?lang=" + currentLang;
+  const text = `${getUIText("siteTitle")} \n${url}`;
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+  window.open(waUrl, "_blank");
+}
 
-  // 2. 在模板中動態繪製現有網址的 QR Code，讓別人掃描就能挑戰
-  const qrContainer = document.getElementById("certQrCode");
-  qrContainer.innerHTML = "";
-  const currentUrl = window.location.origin + window.location.pathname + "?lang=" + currentLang;
-  new QRCode(qrContainer, {
-    text: currentUrl,
-    width: 90,
-    height: 90,
-    correctLevel: QRCode.CorrectLevel.H
+function shareFacebook() {
+  const url = window.location.origin + window.location.pathname + "?lang=" + currentLang;
+  const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+  window.open(fbUrl, "_blank");
+}
+
+function shareInstagram() {
+  const url = window.location.origin + window.location.pathname + "?lang=" + currentLang;
+  navigator.clipboard.writeText(url).then(() => {
+    const msg = document.getElementById("copyMsg");
+    if (msg) {
+      msg.innerText = getUIText("copied");
+      setTimeout(() => { msg.innerText = ""; }, 3000);
+    } else {
+      alert(getUIText("copied"));
+    }
   });
-
-  // 3. 等待 QR Code 渲染完畢後，呼叫 html2canvas 將 DOM 轉換為畫布
-  setTimeout(() => {
-    const element = document.getElementById("certificateCaptureTemplate").firstElementChild;
-    
-    html2canvas(element, {
-      scale: 2, // 提升圖片清晰度，發社群不模糊
-      useCORS: true,
-      backgroundColor: "#ffffff"
-    }).then(canvas => {
-      const imgData = canvas.toDataURL("image/png");
-      
-      // 4. 判斷是否為 iOS / iPhone 行動裝置
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      
-      if (isIOS) {
-        // iPhone 開放彈出預覽層，讓使用者長按圖片儲存
-        const container = document.getElementById("previewImageContainer");
-        container.innerHTML = `<img src="${imgData}" alt="Certificate">`;
-        document.getElementById("imagePreviewModal").style.display = "flex";
-      } else {
-        // 電腦、Android 直接自動化下載圖片
-        const link = document.createElement("a");
-        link.download = `quiz-result-${score}pts.png`;
-        link.href = imgData;
-        link.click();
-        
-        // 同時也複製連結方便雙重分享
-        navigator.clipboard.writeText(currentUrl);
-        const msg = document.getElementById("copyMsg");
-        if (msg) {
-          msg.classList.add("show");
-          setTimeout(() => { msg.classList.remove("show"); }, 2000);
-        }
-      }
-    });
-  }, 150);
 }
 
-function closePreviewModal() {
-  document.getElementById("imagePreviewModal").style.display = "none";
-}
-
-function getCorrectIndexes(question) {
-  const indexes = [];
-  question.options.forEach((opt, i) => {
-    if (opt.correct) indexes.push(i);
-  });
-  return indexes;
-}
-
-function isAnswerCorrect(question, selectedIndexes) {
-  const correctIndexes = getCorrectIndexes(question);
-  if (selectedIndexes.length !== correctIndexes.length) return false;
-  
-  const sortedSelected = [...selectedIndexes].map(num => Number(num)).sort((x, y) => x - y);
-  const sortedCorrect = [...correctIndexes].map(num => Number(num)).sort((x, y) => x - y);
-  
-  return sortedSelected.every((value, index) => value === sortedCorrect[index]);
-}
-
-function getScore() {
-  if (!quizData) return 0;
+function calculateScore() {
   let score = 0;
   quizData.questions.forEach(q => {
     const state = answersState[q.id];
-    if (state && state.submitted && isAnswerCorrect(q, state.selected)) {
-      score++;
+    if (!state) return;
+    
+    if (q.type === "single") {
+      const correctIdx = q.options.findIndex(o => o.correct);
+      if (state.selected.length === 1 && state.selected[0] === correctIdx) {
+        score += 10;
+      }
+    } else if (q.type === "multiple") {
+      const correctIndices = q.options.map((o, idx) => o.correct ? idx : null).filter(v => v !== null);
+      const userSel = [...state.selected].sort((x, y) => x - y);
+      const corrSel = [...correctIndices].sort((x, y) => x - y);
+      
+      if (userSel.length === corrSel.length && userSel.every((v, i) => v === corrSel[i])) {
+        score += 10;
+      }
     }
   });
   return score;
 }
 
-function getAnsweredCount() {
-  return Object.values(answersState).filter(s => s && s.submitted).length;
-}
-
-function allAnswered() {
-  return quizData && getAnsweredCount() === quizData.questions.length;
-}
-
 function applyLanguageUI() {
-  const ui = quizData.ui[currentLang];
-  document.title = ui.siteTitle;
-  document.documentElement.lang = currentLang;
-
-  document.getElementById("badge").innerText = ui.badge;
-  document.getElementById("siteTitle").innerText = ui.siteTitle;
-  document.getElementById("heroSubtitle").innerText = ui.heroSubtitle;
-  document.getElementById("intro").innerText = ui.intro;
-  document.getElementById("nextBtn").innerText = ui.next;
-  document.getElementById("footer").innerText = ui.footer;
-  document.getElementById("langSelect").value = currentLang;
-  document.getElementById("langLabel").innerText = ui.langLabel || "Language / 語言 / 语言";
-  document.getElementById("checkBtn").innerText = ui.checkAnswer;
-}
-
-function updateSummary() {
-  const score = getScore();
-  document.getElementById("summary").innerHTML = `${getUIText("scoreLabel")}：${score} / ${quizData.questions.length}`;
-}
-
-function hideResult() {
-  const box = document.getElementById("result");
-  box.className = "result";
-  box.innerHTML = "";
-  box.style.display = "none";
-}
-
-function triggerAnimation(el, className) {
-  if (!el) return;
-  el.classList.remove(className);
-  void el.offsetWidth;
-  el.classList.add(className);
-}
-
-function showResult(question, selectedIndexes) {
-  const resultBox = document.getElementById("result");
-  const correct = isAnswerCorrect(question, selectedIndexes);
-  resultBox.classList.remove("result-pop", "result-shake");
-
-  const contentHtml = `
-    ${correct ? getUIText("correctLabel") : getUIText("wrongLabel")}<br>
-    ${question.explanation[currentLang]}
-    <div class="reminder">${getUIText("reminderLabel")}：${question.reminder[currentLang]}</div>
-  `;
-
-  if (correct) {
-    resultBox.className = "result correct";
-    resultBox.innerHTML = contentHtml;
-    resultBox.style.display = "block";
-    triggerAnimation(resultBox, "result-pop");
-  } else {
-    resultBox.className = "result wrong";
-    resultBox.innerHTML = contentHtml;
-    resultBox.style.display = "block";
-    triggerAnimation(resultBox, "result-shake");
-  }
-}
-
-function getLevelKey() {
-  const total = quizData.questions.length;
-  const score = getScore();
-  const ratio = score / total;
-  if (score === total) return "perfect";
-  if (ratio >= 0.7) return "pass70";
-  return "below70";
-}
-
-function getEncouragementMessage() {
-  return quizData.messages[getLevelKey()][currentLang];
-}
-
-function buildLevelBadge(levelKey) {
-  const levelText = getUIText("levels")[levelKey] || "";
-  const parts = levelText.trim().split(" ");
-  const icon = parts[0] || "🏅";
-  const text = parts.slice(1).join(" ") || levelText;
-
-  return `
-    <div class="level-badge">
-      <span class="level-icon">${icon}</span>
-      <span class="level-text">${getUIText("levelLabel")}：${text}</span>
-    </div>
-  `;
-}
-
-/* 即時變更選項的 UI 反應，確保底色與邊框同步連動 */
-function refreshOptionSelectionUI(question, state) {
-  const buttons = document.querySelectorAll("#answers .option-btn");
-  buttons.forEach((btn, i) => {
-    if (state.selected.includes(i)) {
-      btn.classList.add("option-selected");
-    } else {
-      btn.classList.remove("option-selected");
-    }
-  });
-
-  if (question.type === "multiple" && !state.submitted) {
-    document.getElementById("answerAction").style.display = "block";
-    document.getElementById("checkBtn").disabled = state.selected.length === 0;
-  }
-}
-
-function showFinalResult() {
-  showingFinal = true;
-  const card = document.getElementById("quizCard");
-  card.classList.add("final-mode");
-
-  const finalBox = document.getElementById("finalResult");
-  const score = getScore();
-  const total = quizData.questions.length;
-  const levelKey = getLevelKey();
-
-  let finalHtml = `
-    <div class="final-enter">
-      <h3 style="margin-top:0; font-size:24px;">🎉 ${getUIText("resultTitle")}</h3>
-      <p style="font-size:18px; font-weight:bold;">
-        ${getUIText("scoreLabel")}：<span style="color:var(--red); font-size:24px;">${score}</span> / ${total}
-      </p>
-      ${buildLevelBadge(levelKey)}
-      <p class="intro" style="margin-top:14px; background:#fff; padding:12px; border-radius:8px; border:2px solid var(--ink);">
-        ${getEncouragementMessage()}
-      </p>
-      
-      <div class="share-box" style="text-align:left;">
-        <div class="share-title">📸 生成你的榮譽成就卡</div>
-        <div class="share-text">我們已為您優化分享功能。點選下方按鈕即可「一鍵生成專屬證書圖片」，自由發布至 Instagram、WhatsApp、Facebook 等各大社群平台！</div>
-        <div class="share-actions">
-          <button class="share-btn" style="background:linear-gradient(135deg, #ffd54f, #ff6b6b); color:#1f1f1f; width:100%; font-size:16px; padding:14px;" onclick="generateCertificateImage()">
-            ✨ 一鍵生成/下載成就卡圖片
-          </button>
-        </div>
-        <div class="copy-msg" id="copyMsg">📋 測驗連結已同時複製到剪貼簿！</div>
-      </div>
-    </div>
-  `;
-
-  finalBox.innerHTML = finalHtml;
-  finalBox.className = "result info";
-  finalBox.style.display = "block";
-
-  const nextBtn = document.getElementById("nextBtn");
-  nextBtn.innerText = getUIText("restart");
-  nextBtn.classList.remove("cta-glow");
-}
-
-function hideFinalResult() {
-  const box = document.getElementById("finalResult");
-  if (!box) return;
-  box.className = "result";
-  box.innerHTML = "";
-  box.style.display = "none";
-  showingFinal = false;
-}
-
-function getOptionLetter(index) {
-  const alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
-  return alphabet[index] || `${index + 1}`;
-}
-
-function renderPresentation(question) {
-  const storyCard = document.getElementById("storyCard");
-  const questionBox = document.getElementById("question");
-
-  if (question.presentation === "scenario" && question.story && question.story[currentLang]) {
-    const story = question.story[currentLang];
-    document.getElementById("storyLabel").innerText = story.label || getUIText("scenarioLabelDefault");
-    document.getElementById("storyTitle").innerText = story.title || "";
-
-    const storyContentBox = document.getElementById("storyContent");
-    storyContentBox.innerHTML = "";
-
-    if (Array.isArray(story.dialogues)) {
-      story.dialogues.forEach((item, idx) => {
-        const wrap = document.createElement("div");
-        wrap.className = `dialogue-wrap ${item.side === "right" ? "right" : "left"}`;
-        wrap.style.animationDelay = `${idx * 0.08}s`;
-
-        const avatar = document.createElement("div");
-        avatar.className = "avatar";
-        avatar.textContent = item.avatar || "🙂";
-
-        const bubble = document.createElement("div");
-        bubble.className = "bubble";
-
-        const speaker = document.createElement("div");
-        speaker.className = "speaker";
-        speaker.textContent = item.speaker || "";
-
-        const text = document.createElement("div");
-        text.className = "bubble-text";
-        text.textContent = item.text || "";
-
-        bubble.appendChild(speaker);
-        bubble.appendChild(text);
-        wrap.appendChild(avatar);
-        wrap.appendChild(bubble);
-        storyContentBox.appendChild(wrap);
-      });
-    } else if (Array.isArray(story.content)) {
-      story.content.forEach(line => {
-        const div = document.createElement("div");
-        div.className = "bubble-text";
-        div.textContent = line;
-        storyContentBox.appendChild(div);
-      });
-    }
-    storyCard.style.display = "block";
-    questionBox.innerHTML = question.question[currentLang];
-  } else {
-    storyCard.style.display = "none";
-    questionBox.innerHTML = question.scenario[currentLang];
-  }
-}
-
-function animateQuestionArea() {
-  const area = document.getElementById("questionArea");
-  if (!area) return;
-  area.classList.remove("content-anim");
-  void area.offsetWidth;
-  area.classList.add("content-anim");
+  document.getElementById("badge").innerText = getUIText("badge");
+  document.getElementById("langLabel").innerText = getUIText("langLabel");
+  document.getElementById("siteTitle").innerText = getUIText("siteTitle");
+  document.getElementById("heroSubtitle").innerText = getUIText("heroSubtitle");
+  document.getElementById("intro").innerText = getUIText("intro");
 }
 
 function renderQuestion() {
-  const question = quizData.questions[current];
-  if (!question) return;
-
-  document.getElementById("quizCard").classList.remove("final-mode");
-  hideFinalResult();
   applyLanguageUI();
+  showingFinal = false;
 
+  const questionArea = document.getElementById("questionArea");
+  questionArea.style.display = "block";
+
+  const question = quizData.questions[current];
   const state = getQuestionState(question.id);
-  const alreadySubmitted = state.submitted;
 
-  const questionLabel = getUIText("questionLabel")
+  document.getElementById("meta").innerText = getUIText("questionLabel")
     .replace("{current}", current + 1)
     .replace("{total}", quizData.questions.length);
 
-  document.getElementById("meta").innerHTML = `${questionLabel} ・ ${question.category[currentLang]}`;
-  document.getElementById("title").innerHTML = question.title[currentLang];
+  document.getElementById("title").innerText = question.title[currentLang];
 
-  renderPresentation(question);
+  const storyCard = document.getElementById("storyCard");
+  if (question.presentation === "scenario" && question.story) {
+    storyCard.style.display = "block";
+    const story = question.story[currentLang];
+    document.getElementById("storyLabel").innerText = story.label;
+    document.getElementById("storyTitle").innerText = story.title;
+    
+    const storyContent = document.getElementById("storyContent");
+    storyContent.innerHTML = "";
+    story.dialogues.forEach(d => {
+      const row = document.createElement("div");
+      row.className = `dialogue-item ${d.side === "right" ? "right" : ""}`;
+      row.innerHTML = `
+        <div class="dialogue-avatar">${d.avatar}</div>
+        <div class="dialogue-bubble">
+          <strong>${d.speaker}:</strong> ${d.text}
+        </div>
+      `;
+      storyContent.appendChild(row);
+    });
+  } else {
+    storyCard.style.display = "none";
+  }
 
-  document.getElementById("questionType").innerHTML =
-    question.type === "multiple" ? getUIText("multipleLabel") : getUIText("singleLabel");
+  document.getElementById("question").innerText = question.type === "single" 
+    ? (question.question ? question.question[currentLang] : question.scenario[currentLang])
+    : (question.scenario ? question.scenario[currentLang] : "");
 
-  document.getElementById("questionHint").innerHTML =
-    question.type === "multiple" ? getUIText("multipleHint") : getUIText("singleHint");
+  document.getElementById("questionType").innerText = question.type === "single" 
+    ? getUIText("singleLabel") 
+    : getUIText("multipleLabel");
 
-  let html = "";
-  const correctIndexes = getCorrectIndexes(question);
+  document.getElementById("questionHint").innerText = question.type === "single" 
+    ? getUIText("singleHint") 
+    : getUIText("multipleHint");
 
-  question.options.forEach((opt, i) => {
-    let classes = ["option-btn"];
-    if (state.selected.includes(i)) classes.push("option-selected");
+  const answersContainer = document.getElementById("answers");
+  answersContainer.innerHTML = "";
 
-    if (alreadySubmitted) {
-      if (correctIndexes.includes(i)) {
-        classes.push("option-correct");
-      } else if (state.selected.includes(i) && !correctIndexes.includes(i)) {
-        classes.push("option-wrong");
-      }
-    }
-
-    html += `
-      <button class="${classes.join(" ")}" onclick="selectOption(${i})" ${alreadySubmitted ? "disabled" : ""}>
-        <span class="option-letter">${getOptionLetter(i)}.</span>
-        <span>${opt.text[currentLang]}</span>
-      </button>
+  question.options.forEach((opt, idx) => {
+    const div = document.createElement("div");
+    div.className = `option ${state.selected.includes(idx) ? "selected" : ""}`;
+    
+    const iconClass = question.type === "single" ? "radio-box" : "checkbox-box";
+    div.innerHTML = `
+      <div class="${iconClass}"></div>
+      <div class="option-text">${opt.text[currentLang]}</div>
     `;
+
+    if (!state.submitted) {
+      div.onclick = () => {
+        if (question.type === "single") {
+          state.selected = [idx];
+        } else {
+          if (state.selected.includes(idx)) {
+            state.selected = state.selected.filter(i => i !== idx);
+          } else {
+            state.selected.push(idx);
+          }
+        }
+        renderQuestion();
+      };
+    }
+    answersContainer.appendChild(div);
   });
 
-  document.getElementById("answers").innerHTML = html;
+  const answerAction = document.getElementById("answerAction");
+  const checkBtn = document.getElementById("checkBtn");
+  const resultDiv = document.getElementById("result");
 
-  if (question.type === "multiple" && !alreadySubmitted) {
-    document.getElementById("answerAction").style.display = "block";
-    document.getElementById("checkBtn").disabled = state.selected.length === 0;
+  if (!state.submitted) {
+    answerAction.style.display = "block";
+    checkBtn.innerText = getUIText("checkAnswer");
+    resultDiv.style.display = "none";
   } else {
-    document.getElementById("answerAction").style.display = "none";
+    answerAction.style.display = "none";
+    resultDiv.style.display = "block";
+    
+    let isCorrect = false;
+    if (question.type === "single") {
+      isCorrect = question.options[state.selected[0]]?.correct === true;
+    } else {
+      const correctIndices = question.options.map((o, idx) => o.correct ? idx : null).filter(v => v !== null);
+      const userSel = [...state.selected].sort((x, y) => x - y);
+      const corrSel = [...correctIndices].sort((x, y) => x - y);
+      isCorrect = userSel.length === corrSel.length && userSel.every((v, i) => v === corrSel[i]);
+    }
+
+    resultDiv.className = `result ${isCorrect ? "correct" : "wrong"}`;
+    resultDiv.innerHTML = `
+      <div class="result-status">${isCorrect ? getUIText("correctLabel") : getUIText("wrongLabel")}</div>
+      <div>${question.explanation[currentLang]}</div>
+      <div class="reminder-box">
+        <strong>${getUIText("reminderLabel")}:</strong> ${question.reminder[currentLang]}
+      </div>
+    `;
   }
 
-  if (alreadySubmitted) {
-    showResult(question, state.selected);
-  } else {
-    hideResult();
-  }
-
-  updateSummary();
   const nextBtn = document.getElementById("nextBtn");
-  nextBtn.classList.remove("cta-glow");
-
-  if (allAnswered() && current === quizData.questions.length - 1 && alreadySubmitted) {
+  if (current === quizData.questions.length - 1) {
     nextBtn.innerText = getUIText("finish");
-    nextBtn.classList.add("cta-glow");
   } else {
     nextBtn.innerText = getUIText("next");
   }
-
-  animateQuestionArea();
 }
 
-function selectOption(index) {
+function checkCurrentAnswer() {
   const question = quizData.questions[current];
   const state = getQuestionState(question.id);
-  if (state.submitted) return;
 
-  if (question.type === "single") {
-    state.selected = [index];
-    state.submitted = true;
-    renderQuestion();
-    return;
-  }
-
-  if (question.type === "multiple") {
-    if (state.selected.includes(index)) {
-      state.selected = state.selected.filter(i => i !== index);
-    } else {
-      state.selected.push(index);
-    }
-    refreshOptionSelectionUI(question, state);
-  }
-}
-
-function submitMultipleAnswer() {
-  const question = quizData.questions[current];
-  const state = getQuestionState(question.id);
-  if (question.type !== "multiple") return;
   if (state.selected.length === 0) {
     alert(getUIText("selectAtLeastOne"));
     return;
   }
+
   state.submitted = true;
   renderQuestion();
 }
 
-function restartQuiz() {
-  answersState = {};
-  current = 0;
-  showingFinal = false;
-  document.getElementById("quizCard").classList.remove("final-mode");
-  document.getElementById("nextBtn").classList.remove("cta-glow");
-  renderQuestion();
+function showFinalResult() {
+  showingFinal = true;
+  applyLanguageUI();
+
+  const total = quizData.questions.length * 10;
+  const score = calculateScore();
+
+  let levelKey = "below70";
+  if (score === total) {
+    levelKey = "perfect";
+  } else if (score >= 70) {
+    levelKey = "pass70";
+  }
+
+  const levelText = getUIText("levels")[levelKey];
+  const msgText = quizData.messages[levelKey][currentLang];
+
+  // ✨ 多語言完美同步修復：更新隱藏卡片模板（#hiddenCardCapture）內的所有英文/繁體硬編碼
+  document.getElementById("certBadgeTop").innerText = getUIText("badge");
+  document.getElementById("certSiteTitle").innerText = getUIText("siteTitle");
+  document.getElementById("certScoreLabel").innerText = getUIText("scoreLabel") + ":";
+  document.getElementById("certScoreVal").innerText = `${score} / ${total}`;
+  document.getElementById("certLevelLabel").innerText = getUIText("levelLabel") + ":";
+  
+  // 提取乾淨的稱號文字（去除 Emoji 裝飾）
+  const cleanLevelName = levelText.replace(/[\u2000-\u3300\ud83c\ud83d\ud83e]/g, '').trim();
+  document.getElementById("certLevelName").innerText = cleanLevelName;
+  
+  document.getElementById("certMsgVal").innerText = msgText;
+  document.getElementById("certQrTip").innerText = "Scan to play or verify results online.";
+  document.getElementById("certQuizName").innerText = "Data Integrity Quiz Platform";
+  document.getElementById("certMotto").innerText = getUIText("footer");
+
+  // 🎯 核心聯動：根據等級，加載對應的 PNG 勳章檔案到隱藏卡片中
+  const certBadgeImg = document.getElementById("certBadgeImg");
+  certBadgeImg.src = `badge-${levelKey}.png`;
+
+  // 渲染前端主畫面的結果頁
+  const questionArea = document.getElementById("questionArea");
+  questionArea.innerHTML = `
+    <div class="final-score-title">${getUIText("resultTitle")}</div>
+    <div class="final-rank">${levelText}</div>
+    <div class="intro">${msgText}</div>
+    
+    <div class="controls" style="padding:0; margin-top:16px;">
+      <div style="font-size:20px; font-weight:bold; margin-bottom:8px;">
+        ${getUIText("scoreLabel")}: <span style="color:var(--red); font-size:26px;">${score}</span> / ${total}
+      </div>
+    </div>
+
+    <div class="share-zone">
+      <button class="share-btn" onclick="shareWhatsApp()">WhatsApp</button>
+      <button class="share-btn" onclick="shareFacebook()">Facebook</button>
+      <button class="share-btn" onclick="shareInstagram()">${getUIText("copyLink")}</button>
+      <span id="copyMsg" style="margin-left:8px; font-weight:bold; color:var(--green); align-self:center;"></span>
+    </div>
+
+    <div class="screenshot-area">
+      <p style="margin:0 0 10px 0; font-weight:bold; font-size:14px; color:#555;">
+        🖼️ 正在即時繪製您的個人合規成就卡片...
+      </p>
+      <div id="screenshotSpinner" style="font-weight:bold; color:var(--purple);">Generating Image...</div>
+      <div id="imageContainer"></div>
+    </div>
+  `;
+
+  document.getElementById("nextBtn").innerText = getUIText("restartQuiz");
+
+  // 確保圖片載入完成後再利用 html2canvas 實時擷取
+  setTimeout(() => {
+    const target = document.getElementById("hiddenCardCapture");
+    html2canvas(target, {
+      useCORS: true,
+      scale: 2, // 提升至雙倍清晰度，防止字體模糊
+      backgroundColor: null
+    }).then(canvas => {
+      const imgData = canvas.toDataURL("image/png");
+      const img = document.createElement("img");
+      img.src = imgData;
+      img.className = "screenshot-img";
+      
+      const container = document.getElementById("imageContainer");
+      const spinner = document.getElementById("screenshotSpinner");
+      if (container) container.appendChild(img);
+      if (spinner) spinner.style.display = "none";
+    }).catch(err => {
+      console.error("Canvas drawing failed:", err);
+      const spinner = document.getElementById("screenshotSpinner");
+      if (spinner) spinner.innerText = "❌ 無法生成卡片圖片，請手動截圖。";
+    });
+  }, 600);
 }
 
-function nextQuestion() {
-  if (!quizData) return;
+function restartQuiz() {
+  current = 0;
+  answersState = {};
+  showingFinal = false;
+  
+  // 重新初始化整個網頁結構
+  window.location.reload();
+}
+
+function handleNext() {
   if (showingFinal) {
     restartQuiz();
     return;
@@ -488,7 +329,7 @@ function nextQuestion() {
   const state = getQuestionState(question.id);
 
   if (!state.submitted) {
-    alert(getUIText("answerBeforeNext"));
+    checkCurrentAnswer();
     return;
   }
 
@@ -513,12 +354,13 @@ async function loadQuestions() {
       currentLang = urlLang;
     }
 
+    document.getElementById("langSelect").value = currentLang;
     renderQuestion();
   } catch (error) {
     document.body.innerHTML = `
       <div class="card">
         <div class="result wrong" style="display:block;">
-          ❌ Failed to load quiz<br><br>
+          ❌ Failed to load quiz questions.<br><br>
           <small>${error.message}</small>
         </div>
       </div>`;
@@ -531,14 +373,13 @@ document.getElementById("langSelect").addEventListener("change", function () {
   updateLanguageInUrl(currentLang);
 
   if (showingFinal) {
-    applyLanguageUI();
     showFinalResult();
   } else {
     renderQuestion();
   }
 });
 
-document.getElementById("checkBtn").addEventListener("click", submitMultipleAnswer);
-document.getElementById("nextBtn").addEventListener("click", nextQuestion);
+document.getElementById("nextBtn").addEventListener("click", handleNext);
 
-loadQuestions();
+// 初始化加載
+window.onload = loadQuestions;
