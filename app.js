@@ -63,16 +63,13 @@ function getCorrectIndexes(question) {
 }
 
 function isAnswerCorrect(question, selectedIndexes) {
-  const correctIndexes = [];
-  question.options.forEach((opt, i) => {
-    if (opt.correct) correctIndexes.push(i);
-  });
-
+  const correctIndexes = getCorrectIndexes(question);
   if (selectedIndexes.length !== correctIndexes.length) return false;
-
-  const sortedSelected = selectedIndexes.map(num => Number(num)).sort((a, b) => a - b);
-  const sortedCorrect = correctIndexes.map(num => Number(num)).sort((a, b) => a - b);
-
+  
+  // ✨ 完美修復點：確保不論亂序，型態是字串還是數字，都強制轉為數字並按數值大小嚴格排序
+  const sortedSelected = [...selectedIndexes].map(num => Number(num)).sort((x, y) => x - y);
+  const sortedCorrect = [...correctIndexes].map(num => Number(num)).sort((x, y) => x - y);
+  
   return sortedSelected.every((value, index) => value === sortedCorrect[index]);
 }
 
