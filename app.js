@@ -4,10 +4,8 @@ let current = 0;
 let answersState = {};
 let showingFinal = false;
 
-// 🛡️ 強化版：取得翻譯文字，若 JSON 漏寫 key 則安全回傳空字串，防止程式崩潰
 function getUIText(key) {
-  if (!quizData || !quizData.ui || !quizData.ui[currentLang]) return "";
-  return quizData.ui[currentLang][key] || "";
+  return quizData.ui[currentLang][key];
 }
 
 function updateLanguageInUrl(lang) {
@@ -18,365 +16,526 @@ function updateLanguageInUrl(lang) {
 
 function getQuestionState(questionId) {
   if (!answersState[questionId]) {
-    answersState[questionId] = { selected: [], submitted: false };
+    answersState[questionId] = {
+      selected: [],
+      submitted: false
+    };
   }
   return answersState[questionId];
 }
 
-/* === 社群分享功能區 === */
-function shareWhatsApp() {
-  const url = window.location.origin + window.location.pathname + "?lang=" + currentLang;
-  const text = `${getUIText("siteTitle")} \n${url}`;
-  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
-}
-
-function shareFacebook() {
-  const url = window.location.origin + window.location.pathname + "?lang=" + currentLang;
-  window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, "_blank");
-}
-
-function shareInstagram() {
-  const url = window.location.origin + window.location.pathname + "?lang=" + currentLang;
-  navigator.clipboard.writeText(url).then(() => {
-    const msg = document.getElementById("copyMsg");
-    if (msg) {
-      msg.innerText = getUIText("copied") || "Link Copied!";
-      setTimeout(() => { msg.innerText = ""; }, 3000);
-    } else {
-      alert("Link Copied!");
-    }
+function getCorrectIndexes(question) {
+  const indexes = [];
+  question.options.forEach((opt, i) => {
+    if (opt.correct) indexes.push(i);
   });
+  return indexes;
 }
 
-function calculateScore() {
+function isAnswerCorrect(question, selectedIndexes) {
+  const correctIndexes = getCorrectIndexes(question);
+
+  if (selectedIndexes.length !== correctIndexes.length) return false;
+
+  const sortedSelected = [...selectedIndexes]
+    .map(num => Number(num))
+    .sort((x, y) => x - y);
+
+  const sortedCorrect = [...correctIndexes]
+    .map(num => Number(num))
+    .sort((x, y) => x - y);
+
+  return sortedSelected.every((value, index) => value === sortedCorrect[index]);
+}
+
+function getScore() {
+  if (!quizData) return 0;
+
   let score = 0;
-  if (!quizData || !quizData.questions) return 0;
-  
   quizData.questions.forEach(q => {
     const state = answersState[q.id];
-    if (!state) return;
-    
-    if (q.type === "single") {
-      const correctIdx = q.options.findIndex(o => o.correct);
-      if (state.selected.length === 1 && state.selected[0] === correctIdx) score += 10;
-    } else if (q.type === "multiple") {
-      const correctIndices = q.options.map((o, idx) => o.correct ? idx : null).filter(v => v !== null);
-      const userSel = [...state.selected].sort((x, y) => x - y);
-      const corrSel = [...correctIndices].sort((x, y) => x - y);
-      if (userSel.length === corrSel.length && userSel.every((v, i) => v === corrSel[i])) score += 10;
+    if (state && state.submitted && isAnswerCorrect(q, state.selected)) {
+      score++;
     }
   });
+
   return score;
 }
 
-function applyLanguageUI() {
-  const badgeEl = document.getElementById("badge");
-  const langLabelEl = document.getElementById("langLabel");
-  const siteTitleEl = document.getElementById("siteTitle");
-  const heroSubtitleEl = document.getElementById("heroSubtitle");
-  const introEl = document.getElementById("intro");
+function getAnsweredCount() {
+  return Object.values(answersState).filter(s => s && s.submitted).length;
+}
 
-  if (badgeEl) badgeEl.innerText = getUIText("badge");
-  if (langLabelEl) langLabelEl.innerText = getUIText("langLabel");
-  if (siteTitleEl) siteTitleEl.innerText = getUIText("siteTitle");
-  if (heroSubtitleEl) heroSubtitleEl.innerText = getUIText("heroSubtitle");
-  if (introEl) introEl.innerText = getUIText("intro");
+function allAnswered() {
+  return quizData && getAnsweredCount() === quizData.questions.length;
+}
+
+function applyLanguageUI() {
+  const ui = quizData.ui[currentLang];
+  document.title = ui.siteTitle;
+  document.documentElement.lang = currentLang;
+
+  document.getElementById("badge").innerText = ui.badge;
+  document.getElementById("siteTitle").innerText = ui.siteTitle;
+  document.getElementById("heroSubtitle").innerText = ui.heroSubtitle;
+  document.getElementById("intro").innerText = ui.intro;
+  document.getElementById("nextBtn").innerText = ui.next;
+  document.getElementById("footer").innerText = ui.footer;
+  document.getElementById("langSelect").value = currentLang;
+  document.getElementById("langLabel").innerText = ui.langLabel || "Language / 語言 / 语言";
+  document.getElementById("checkBtn").innerText = ui.checkAnswer;
+}
+
+function updateSummary() {
+  const score = getScore();
+  document.getElementById("summary").innerHTML =
+    `${getUIText("scoreLabel")}：${score} / ${quizData.questions.length}`;
+}
+
+function hideResult() {
+  const box = document.getElementById("result");
+  box.className = "result";
+  box.innerHTML = "";
+  box.style.display = "none";
+}
+
+function triggerAnimation(el, className) {
+  if (!el) return;
+  el.classList.remove(className);
+  void el.offsetWidth;
+  el.classList.add(className);
+}
+
+function showResult(question, selectedIndexes) {
+  const resultBox = document.getElementById("result");
+  const correct = isAnswerCorrect(question, selectedIndexes);
+
+  resultBox.classList.remove("result-pop", "result-shake");
+
+  const contentHtml = `
+    ${correct ? getUIText("correctLabel") : getUIText("wrongLabel")}<br>
+    ${question.explanation[currentLang]}
+    <div class="reminder">${getUIText("reminderLabel")}：${question.reminder[currentLang]}</div>
+  `;
+
+  if (correct) {
+    resultBox.className = "result correct";
+    resultBox.innerHTML = contentHtml;
+    resultBox.style.display = "block";
+    triggerAnimation(resultBox, "result-pop");
+  } else {
+    resultBox.className = "result wrong";
+    resultBox.innerHTML = contentHtml;
+    resultBox.style.display = "block";
+    triggerAnimation(resultBox, "result-shake");
+  }
+}
+
+function getLevelKey() {
+  const total = quizData.questions.length;
+  const score = getScore();
+  const ratio = score / total;
+
+  if (score === total) return "perfect";
+  if (ratio >= 0.7) return "pass70";
+  return "below70";
+}
+
+function getEncouragementMessage() {
+  return quizData.messages[getLevelKey()][currentLang];
+}
+
+function buildLevelBadge(levelKey) {
+  const levelText = getUIText("levels")[levelKey] || "";
+  const parts = levelText.trim().split(" ");
+  const icon = parts[0] || "🏅";
+  const text = parts.slice(1).join(" ") || levelText;
+
+  return `
+    <div class="level-badge">
+      <span class="level-icon">${icon}</span>
+      <span class="level-text">${getUIText("levelLabel")}：${text}</span>
+    </div>
+  `;
+}
+
+/* ---------- 分享相關 ---------- */
+
+function getShareUrl() {
+  return `${window.location.origin}${window.location.pathname}?lang=${currentLang}`;
+}
+
+function copyTextToClipboard(text) {
+  return navigator.clipboard.writeText(text);
+}
+
+function copyQuizLink() {
+  const url = getShareUrl();
+
+  copyTextToClipboard(url).then(() => {
+    const msg = document.getElementById("copyMsg");
+    if (msg) {
+      msg.classList.remove("show");
+      void msg.offsetWidth;
+      msg.classList.add("show");
+      setTimeout(() => {
+        msg.classList.remove("show");
+      }, 2500);
+    }
+  }).catch(() => {
+    alert(url);
+  });
+}
+
+function shareWhatsApp() {
+  const url = getShareUrl();
+  const text = `${getUIText("siteTitle")}\n${url}`;
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+  window.open(waUrl, "_blank", "noopener,noreferrer");
+}
+
+function shareFacebook() {
+  const url = getShareUrl();
+  const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+  window.open(fbUrl, "_blank", "noopener,noreferrer");
+}
+
+function shareInstagram() {
+  const url = getShareUrl();
+
+  copyTextToClipboard(url).then(() => {
+    const msg = document.getElementById("copyMsg");
+    const igHint = document.getElementById("igHint");
+
+    if (msg) {
+      msg.classList.remove("show");
+      void msg.offsetWidth;
+      msg.classList.add("show");
+    }
+
+    if (igHint) {
+      igHint.style.display = "block";
+      setTimeout(() => {
+        igHint.style.display = "none";
+      }, 4000);
+    }
+  }).catch(() => {
+    alert(url);
+  });
+}
+
+function renderShareSection() {
+  return `
+    <div class="share-box">
+      <div class="share-title">${getUIText("shareTitle")}</div>
+      <div class="share-text">${getUIText("shareText")}</div>
+
+      <div class="share-actions">
+        <button class="share-btn whatsapp" onclick="shareWhatsApp()">🟢 WhatsApp</button>
+        <button class="share-btn facebook" onclick="shareFacebook()">🔵 Facebook</button>
+        <button class="share-btn instagram" onclick="shareInstagram()">🟣 Instagram</button>
+        <button class="share-btn" style="background:var(--grey);" onclick="copyQuizLink()">${getUIText("copyLink")}</button>
+      </div>
+
+      <div class="copy-msg" id="copyMsg">${getUIText("copied")}</div>
+      <div class="ig-hint" id="igHint" style="display:none;">
+        📸 已複製小測驗連結！您可以前往社交媒體發布貼文分享。
+      </div>
+    </div>
+  `;
+}
+
+/* ---------- 完成頁 ---------- */
+
+function showFinalResult() {
+  showingFinal = true;
+
+  const card = document.getElementById("quizCard");
+  card.classList.add("final-mode");
+
+  const finalBox = document.getElementById("finalResult");
+  const score = getScore();
+  const total = quizData.questions.length;
+  const levelKey = getLevelKey();
+
+  finalBox.innerHTML = `
+    <div class="final-enter">
+      <h3 style="margin-top:0; font-size:24px;">🎉 ${getUIText("resultTitle")}</h3>
+      <p style="font-size:18px; font-weight:bold;">
+        ${getUIText("scoreLabel")}：<span style="color:var(--red); font-size:24px;">${score}</span> / ${total}
+      </p>
+      ${buildLevelBadge(levelKey)}
+      <p class="intro" style="margin-top:14px; background:#fff; padding:12px; border-radius:8px; border:2px solid var(--ink);">
+        ${getEncouragementMessage()}
+      </p>
+      ${renderShareSection()}
+    </div>
+  `;
+
+  finalBox.className = "result info";
+  finalBox.style.display = "block";
+
+  const nextBtn = document.getElementById("nextBtn");
+  nextBtn.innerText = getUIText("restart");
+  nextBtn.classList.remove("cta-glow");
+}
+
+function hideFinalResult() {
+  const box = document.getElementById("finalResult");
+  if (!box) return;
+
+  box.className = "result";
+  box.innerHTML = "";
+  box.style.display = "none";
+  showingFinal = false;
+}
+
+/* ---------- 題目呈現 ---------- */
+
+function getOptionLetter(index) {
+  const alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+  return alphabet[index] || `${index + 1}`;
+}
+
+function renderPresentation(question) {
+  const storyCard = document.getElementById("storyCard");
+  const questionBox = document.getElementById("question");
+
+  if (question.presentation === "scenario" && question.story && question.story[currentLang]) {
+    const story = question.story[currentLang];
+
+    document.getElementById("storyLabel").innerText =
+      story.label || getUIText("scenarioLabelDefault");
+    document.getElementById("storyTitle").innerText = story.title || "";
+
+    const storyContentBox = document.getElementById("storyContent");
+    storyContentBox.innerHTML = "";
+
+    if (Array.isArray(story.dialogues)) {
+      story.dialogues.forEach((item, idx) => {
+        const wrap = document.createElement("div");
+        wrap.className = `dialogue-wrap ${item.side === "right" ? "right" : "left"}`;
+        wrap.style.animationDelay = `${idx * 0.08}s`;
+
+        const avatar = document.createElement("div");
+        avatar.className = "avatar";
+        avatar.textContent = item.avatar || "🙂";
+
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+
+        const speaker = document.createElement("div");
+        speaker.className = "speaker";
+        speaker.textContent = item.speaker || "";
+
+        const text = document.createElement("div");
+        text.className = "bubble-text";
+        text.textContent = item.text || "";
+
+        bubble.appendChild(speaker);
+        bubble.appendChild(text);
+
+        wrap.appendChild(avatar);
+        wrap.appendChild(bubble);
+
+        storyContentBox.appendChild(wrap);
+      });
+    } else if (Array.isArray(story.content)) {
+      story.content.forEach(line => {
+        const div = document.createElement("div");
+        div.className = "bubble-text";
+        div.textContent = line;
+        storyContentBox.appendChild(div);
+      });
+    }
+
+    storyCard.style.display = "block";
+    questionBox.innerHTML = question.question[currentLang];
+  } else {
+    storyCard.style.display = "none";
+    questionBox.innerHTML = question.scenario[currentLang];
+  }
+}
+
+function animateQuestionArea() {
+  const area = document.getElementById("questionArea");
+  if (!area) return;
+
+  area.classList.remove("content-anim");
+  void area.offsetWidth;
+  area.classList.add("content-anim");
+}
+
+function refreshOptionSelectionUI(question, state) {
+  const buttons = document.querySelectorAll("#answers .option-btn");
+
+  buttons.forEach((btn, i) => {
+    btn.classList.remove("option-selected");
+
+    if (state.selected.includes(i)) {
+      btn.classList.add("option-selected");
+    }
+  });
+
+  if (question.type === "multiple" && !state.submitted) {
+    const answerAction = document.getElementById("answerAction");
+    const checkBtn = document.getElementById("checkBtn");
+
+    answerAction.style.display = "block";
+    checkBtn.disabled = state.selected.length === 0;
+  }
 }
 
 function renderQuestion() {
+  const question = quizData.questions[current];
+  if (!question) return;
+
+  document.getElementById("quizCard").classList.remove("final-mode");
+  hideFinalResult();
   applyLanguageUI();
-  showingFinal = false;
 
-  const questionArea = document.getElementById("questionArea");
-  if (questionArea) questionArea.style.display = "block";
+  const state = getQuestionState(question.id);
+  const alreadySubmitted = state.submitted;
 
-  if (!quizData || !quizData.questions || quizData.questions.length === 0) return;
+  const questionLabel = getUIText("questionLabel")
+    .replace("{current}", current + 1)
+    .replace("{total}", quizData.questions.length);
+
+  document.getElementById("meta").innerHTML =
+    `${questionLabel} ・ ${question.category[currentLang]}`;
+  document.getElementById("title").innerHTML = question.title[currentLang];
+
+  renderPresentation(question);
+
+  document.getElementById("questionType").innerHTML =
+    question.type === "multiple"
+      ? getUIText("multipleLabel")
+      : getUIText("singleLabel");
+
+  document.getElementById("questionHint").innerHTML =
+    question.type === "multiple"
+      ? getUIText("multipleHint")
+      : getUIText("singleHint");
+
+  let html = "";
+  const correctIndexes = getCorrectIndexes(question);
+
+  question.options.forEach((opt, i) => {
+    let classes = ["option-btn"];
+
+    if (state.selected.includes(i)) {
+      classes.push("option-selected");
+    }
+
+    if (alreadySubmitted) {
+      if (correctIndexes.includes(i)) {
+        classes.push("option-correct");
+      } else if (state.selected.includes(i) && !correctIndexes.includes(i)) {
+        classes.push("option-wrong");
+      }
+    }
+
+    html += `
+      <button class="${classes.join(" ")}" onclick="selectOption(${i})" ${alreadySubmitted ? "disabled" : ""}>
+        <span class="option-letter">${getOptionLetter(i)}.</span>
+        <span>${opt.text[currentLang]}</span>
+      </button>
+    `;
+  });
+
+  document.getElementById("answers").innerHTML = html;
+
+  if (question.type === "multiple" && !alreadySubmitted) {
+    document.getElementById("answerAction").style.display = "block";
+    document.getElementById("checkBtn").disabled = state.selected.length === 0;
+  } else {
+    document.getElementById("answerAction").style.display = "none";
+  }
+
+  if (alreadySubmitted) {
+    showResult(question, state.selected);
+  } else {
+    hideResult();
+  }
+
+  updateSummary();
+
+  const nextBtn = document.getElementById("nextBtn");
+  nextBtn.classList.remove("cta-glow");
+
+  if (allAnswered() && current === quizData.questions.length - 1 && alreadySubmitted) {
+    nextBtn.innerText = getUIText("finish");
+    nextBtn.classList.add("cta-glow");
+  } else {
+    nextBtn.innerText = getUIText("next");
+  }
+
+  animateQuestionArea();
+}
+
+function selectOption(index) {
   const question = quizData.questions[current];
   const state = getQuestionState(question.id);
 
-  const metaEl = document.getElementById("meta");
-  if (metaEl) {
-    // 🛡️ 確保 replace 前字串存在
-    let qLabel = getUIText("questionLabel") || "Question {current} / {total}";
-    metaEl.innerText = String(qLabel).replace("{current}", current + 1).replace("{total}", quizData.questions.length);
+  if (state.submitted) return;
+
+  if (question.type === "single") {
+    state.selected = [index];
+    state.submitted = true;
+    renderQuestion();
+    return;
   }
 
-  const titleEl = document.getElementById("title");
-  if (titleEl) titleEl.innerText = (question.title && question.title[currentLang]) ? question.title[currentLang] : "";
-
-  const storyCard = document.getElementById("storyCard");
-  if (question.presentation === "scenario" && question.story) {
-    if (storyCard) storyCard.style.display = "block";
-    const story = question.story[currentLang] || {};
-    
-    const storyLabelEl = document.getElementById("storyLabel");
-    const storyTitleEl = document.getElementById("storyTitle");
-    const storyContentEl = document.getElementById("storyContent");
-
-    if (storyLabelEl) storyLabelEl.innerText = story.label || "";
-    if (storyTitleEl) storyTitleEl.innerText = story.title || "";
-    
-    if (storyContentEl) {
-      storyContentEl.innerHTML = "";
-      if (story.dialogues) {
-        story.dialogues.forEach(d => {
-          const row = document.createElement("div");
-          row.className = `dialogue-item ${d.side === "right" ? "right" : ""}`;
-          row.innerHTML = `<div class="dialogue-avatar">${d.avatar || "👤"}</div><div class="dialogue-bubble"><strong>${d.speaker || "User"}:</strong> ${d.text || ""}</div>`;
-          storyContentEl.appendChild(row);
-        });
-      }
-    }
-  } else {
-    if (storyCard) storyCard.style.display = "none";
-  }
-
-  const questionEl = document.getElementById("question");
-  if (questionEl) {
-    let qText = "";
-    if (question.type === "single") {
-      qText = (question.question && question.question[currentLang]) ? question.question[currentLang] : (question.scenario && question.scenario[currentLang] ? question.scenario[currentLang] : "");
+  if (question.type === "multiple") {
+    if (state.selected.includes(index)) {
+      state.selected = state.selected.filter(i => i !== index);
     } else {
-      qText = (question.scenario && question.scenario[currentLang]) ? question.scenario[currentLang] : "";
+      state.selected.push(index);
     }
-    questionEl.innerText = qText;
-  }
 
-  const questionTypeEl = document.getElementById("questionType");
-  if (questionTypeEl) questionTypeEl.innerText = question.type === "single" ? getUIText("singleLabel") : getUIText("multipleLabel");
-
-  const questionHintEl = document.getElementById("questionHint");
-  if (questionHintEl) questionHintEl.innerText = question.type === "single" ? getUIText("singleHint") : getUIText("multipleHint");
-
-  const answersContainer = document.getElementById("answers");
-  if (answersContainer) {
-    answersContainer.innerHTML = "";
-    if (question.options) {
-      question.options.forEach((opt, idx) => {
-        const div = document.createElement("div");
-        div.className = `option ${state.selected.includes(idx) ? "selected" : ""}`;
-        const iconClass = question.type === "single" ? "radio-box" : "checkbox-box";
-        const optText = (opt.text && opt.text[currentLang]) ? opt.text[currentLang] : "";
-        
-        div.innerHTML = `<div class="${iconClass}"></div><div class="option-text">${optText}</div>`;
-
-        if (!state.submitted) {
-          div.onclick = () => {
-            if (question.type === "single") {
-              state.selected = [idx];
-            } else {
-              if (state.selected.includes(idx)) {
-                state.selected = state.selected.filter(i => i !== idx);
-              } else {
-                state.selected.push(idx);
-              }
-            }
-            renderQuestion();
-          };
-        }
-        answersContainer.appendChild(div);
-      });
-    }
-  }
-
-  const answerAction = document.getElementById("answerAction");
-  const checkBtn = document.getElementById("checkBtn");
-  const resultDiv = document.getElementById("result");
-
-  if (!state.submitted) {
-    if (answerAction) answerAction.style.display = "block";
-    if (checkBtn) checkBtn.innerText = getUIText("checkAnswer");
-    if (resultDiv) resultDiv.style.display = "none";
-  } else {
-    if (answerAction) answerAction.style.display = "none";
-    if (resultDiv) {
-      resultDiv.style.display = "block";
-      
-      let isCorrect = false;
-      if (question.type === "single") {
-        isCorrect = question.options[state.selected[0]]?.correct === true;
-      } else {
-        const correctIndices = question.options.map((o, idx) => o.correct ? idx : null).filter(v => v !== null);
-        const userSel = [...state.selected].sort((x, y) => x - y);
-        const corrSel = [...correctIndices].sort((x, y) => x - y);
-        isCorrect = userSel.length === corrSel.length && userSel.every((v, i) => v === corrSel[i]);
-      }
-
-      // 🛡️ 安全讀取詳解與提醒，避免出現 "undefined"
-      const expText = (question.explanation && question.explanation[currentLang]) ? question.explanation[currentLang] : "";
-      const remText = (question.reminder && question.reminder[currentLang]) ? question.reminder[currentLang] : "";
-
-      resultDiv.className = `result ${isCorrect ? "correct" : "wrong"}`;
-      resultDiv.innerHTML = `
-        <div class="result-status">${isCorrect ? getUIText("correctLabel") : getUIText("wrongLabel")}</div>
-        <div>${expText}</div>
-        <div class="reminder-box">
-          <strong>${getUIText("reminderLabel")}:</strong> ${remText}
-        </div>
-      `;
-    }
-  }
-
-  const nextBtn = document.getElementById("nextBtn");
-  if (nextBtn) {
-    nextBtn.innerText = (current === quizData.questions.length - 1) ? getUIText("finish") : getUIText("next");
+    refreshOptionSelectionUI(question, state);
   }
 }
 
-function checkCurrentAnswer() {
+function submitMultipleAnswer() {
   const question = quizData.questions[current];
   const state = getQuestionState(question.id);
 
+  if (question.type !== "multiple") return;
+
   if (state.selected.length === 0) {
-    alert(getUIText("selectAtLeastOne") || "Please select an answer.");
+    alert(getUIText("selectAtLeastOne"));
     return;
   }
+
   state.submitted = true;
   renderQuestion();
 }
 
-function showFinalResult() {
-  showingFinal = true;
-  applyLanguageUI();
-
-  const total = quizData.questions.length * 10;
-  const score = calculateScore();
-
-  let levelKey = "below70";
-  if (score === total) {
-    levelKey = "perfect";
-  } else if (score >= 70) {
-    levelKey = "pass70";
-  }
-
-  // 🛡️ 終極強化：相容不同的 JSON 結構（不管 levels 是寫在 ui 裡面還是外層）
-  let levelText = "Rank";
-  if (quizData.levels && quizData.levels[levelKey] && quizData.levels[levelKey][currentLang]) {
-    levelText = quizData.levels[levelKey][currentLang];
-  } else if (quizData.ui && quizData.ui[currentLang] && quizData.ui[currentLang].levels) {
-    levelText = quizData.ui[currentLang].levels[levelKey] || "Rank";
-  }
-
-  let msgText = "Great job!";
-  if (quizData.messages && quizData.messages[levelKey] && quizData.messages[levelKey][currentLang]) {
-    msgText = quizData.messages[levelKey][currentLang];
-  }
-
-  const certBadgeTop = document.getElementById("certBadgeTop");
-  const certSiteTitle = document.getElementById("certSiteTitle");
-  const certScoreLabel = document.getElementById("certScoreLabel");
-  const certScoreVal = document.getElementById("certScoreVal");
-  const certLevelLabel = document.getElementById("certLevelLabel");
-  const certLevelName = document.getElementById("certLevelName");
-  const certMsgVal = document.getElementById("certMsgVal");
-  const certQrTip = document.getElementById("certQrTip");
-  const certQuizName = document.getElementById("certQuizName");
-  const certMotto = document.getElementById("certMotto");
-
-  if (certBadgeTop) certBadgeTop.innerText = getUIText("badge");
-  if (certSiteTitle) certSiteTitle.innerText = getUIText("siteTitle");
-  if (certScoreLabel) certScoreLabel.innerText = getUIText("scoreLabel") + ":";
-  if (certScoreVal) certScoreVal.innerText = `${score} / ${total}`;
-  if (certLevelLabel) certLevelLabel.innerText = getUIText("levelLabel") + ":";
-  
-  if (certLevelName) {
-    // 🛡️ 強制轉型為字串，確保 .replace 絕對不會報錯
-    const cleanLevelName = String(levelText).replace(/[\u2000-\u3300\ud83c\ud83d\ud83e]/g, '').trim();
-    certLevelName.innerText = cleanLevelName;
-  }
-  
-  if (certMsgVal) certMsgVal.innerText = msgText;
-  if (certQrTip) certQrTip.innerText = "Scan to play or verify results online.";
-  if (certQuizName) certQuizName.innerText = "Data Protection Compliance System";
-  if (certMotto) certMotto.innerText = getUIText("footer");
-
-  const certBadgeImg = document.getElementById("certBadgeImg");
-  if (certBadgeImg) certBadgeImg.src = `badge-${levelKey}.png`;
-
-  const questionArea = document.getElementById("questionArea");
-  if (questionArea) {
-    questionArea.innerHTML = `
-      <div class="final-score-title">${getUIText("resultTitle")}</div>
-      <div class="final-rank">${levelText}</div>
-      <div class="intro">${msgText}</div>
-      
-      <div class="controls" style="padding:0; margin-top:16px;">
-        <div style="font-size:20px; font-weight:bold; margin-bottom:8px;">
-          ${getUIText("scoreLabel")}: <span style="color:var(--red); font-size:26px;">${score}</span> / ${total}
-        </div>
-      </div>
-
-      <div class="share-zone">
-        <button class="share-btn" onclick="shareWhatsApp()">WhatsApp</button>
-        <button class="share-btn" onclick="shareFacebook()">Facebook</button>
-        <button class="share-btn" onclick="shareInstagram()">${getUIText("copyLink")}</button>
-        <span id="copyMsg" style="margin-left:8px; font-weight:bold; color:var(--green); align-self:center;"></span>
-      </div>
-
-      <div class="screenshot-area">
-        <p id="screenshotStatusTip" style="margin:0 0 10px 0; font-weight:bold; font-size:14px; color:#555;">
-          🖼️ 正在即時繪製您的個人合規成就卡片...
-        </p>
-        <div id="screenshotSpinner" style="font-weight:bold; color:var(--purple);">Generating Achievement Card...</div>
-        <div id="imageContainer"></div>
-      </div>
-    `;
-  }
-
-  const nextBtn = document.getElementById("nextBtn");
-  if (nextBtn) nextBtn.innerText = getUIText("restartQuiz");
-
-  setTimeout(() => {
-    const target = document.getElementById("hiddenCardCapture");
-    if (!target) return;
-
-    html2canvas(target, {
-      useCORS: true,
-      scale: 2,
-      backgroundColor: null
-    }).then(canvas => {
-      const imgData = canvas.toDataURL("image/png");
-      const img = document.createElement("img");
-      img.src = imgData;
-      img.className = "screenshot-img";
-      
-      const container = document.getElementById("imageContainer");
-      const spinner = document.getElementById("screenshotSpinner");
-      const statusTip = document.getElementById("screenshotStatusTip");
-
-      if (container) {
-        container.innerHTML = ""; 
-        container.appendChild(img);
-      }
-      if (spinner) spinner.style.display = "none";
-      if (statusTip) statusTip.innerText = "📸 成就卡片生成完畢！長按或點選右鍵即可儲存圖片：";
-    }).catch(err => {
-      console.error("Canvas drawing failed:", err);
-      const spinner = document.getElementById("screenshotSpinner");
-      if (spinner) spinner.innerText = "❌ 無法自動生成卡片圖片，請手動進行螢幕截圖。";
-    });
-  }, 600);
-}
-
 function restartQuiz() {
-  current = 0;
   answersState = {};
+  current = 0;
   showingFinal = false;
-  window.location.reload(); 
+
+  document.getElementById("quizCard").classList.remove("final-mode");
+  document.getElementById("nextBtn").classList.remove("cta-glow");
+
+  renderQuestion();
 }
 
-function handleNext() {
+function nextQuestion() {
+  if (!quizData) return;
+
   if (showingFinal) {
     restartQuiz();
     return;
   }
 
-  if (!quizData || !quizData.questions) return;
   const question = quizData.questions[current];
   const state = getQuestionState(question.id);
 
   if (!state.submitted) {
-    checkCurrentAnswer();
+    alert(getUIText("answerBeforeNext"));
     return;
   }
 
@@ -393,23 +552,22 @@ async function loadQuestions() {
   try {
     const response = await fetch("questions.json");
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
     quizData = await response.json();
 
     const urlLang = new URLSearchParams(window.location.search).get("lang");
     const supported = ["zh-HK", "zh-CN", "en"];
+
     if (supported.includes(urlLang)) {
       currentLang = urlLang;
     }
 
-    const langSelect = document.getElementById("langSelect");
-    if (langSelect) langSelect.value = currentLang;
-    
     renderQuestion();
   } catch (error) {
     document.body.innerHTML = `
       <div class="card">
         <div class="result wrong" style="display:block;">
-          ❌ Failed to load quiz configurations.<br><br>
+          ❌ Failed to load quiz<br><br>
           <small>${error.message}</small>
         </div>
       </div>`;
@@ -417,23 +575,19 @@ async function loadQuestions() {
   }
 }
 
-const langSelectEl = document.getElementById("langSelect");
-if (langSelectEl) {
-  langSelectEl.addEventListener("change", function () {
-    currentLang = this.value; 
-    updateLanguageInUrl(currentLang);
+document.getElementById("langSelect").addEventListener("change", function () {
+  currentLang = this.value;
+  updateLanguageInUrl(currentLang);
 
-    if (showingFinal) {
-      showFinalResult(); 
-    } else {
-      renderQuestion(); 
-    }
-  });
-}
+  if (showingFinal) {
+    applyLanguageUI();
+    showFinalResult();
+  } else {
+    renderQuestion();
+  }
+});
 
-const nextBtnEl = document.getElementById("nextBtn");
-if (nextBtnEl) {
-  nextBtnEl.addEventListener("click", handleNext);
-}
+document.getElementById("checkBtn").addEventListener("click", submitMultipleAnswer);
+document.getElementById("nextBtn").addEventListener("click", nextQuestion);
 
-window.onload = loadQuestions;
+loadQuestions();
