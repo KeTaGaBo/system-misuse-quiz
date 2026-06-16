@@ -666,6 +666,16 @@ function refreshOptionSelectionUI(question, state) {
   }
 }
 
+function hideFinalResult() {
+  const box = document.getElementById("finalResult");
+  if (!box) return;
+
+  box.className = "result";
+  box.innerHTML = "";
+  box.style.display = "none";
+  showingFinal = false;
+}
+
 function renderQuestion() {
   const question = quizData.questions[current];
   if (!question) return;
