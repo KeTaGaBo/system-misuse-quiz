@@ -1,3 +1,4 @@
+
 let quizData = null;
 let currentLang = "zh-HK";
 let current = 0;
@@ -56,14 +57,12 @@ function isAnswerCorrect(question, selectedIndexes) {
 function getScore() {
   if (!quizData) return 0;
   let score = 0;
-
   quizData.questions.forEach(q => {
     const state = answersState[q.id];
     if (state && state.submitted && isAnswerCorrect(q, state.selected)) {
       score++;
     }
   });
-
   return score;
 }
 
@@ -79,7 +78,6 @@ function getLevelKey() {
   const total = quizData.questions.length;
   const score = getScore();
   const ratio = score / total;
-
   if (score === total) return "perfect";
   if (ratio >= 0.7) return "pass70";
   return "below70";
@@ -87,6 +85,27 @@ function getLevelKey() {
 
 function getEncouragementMessage() {
   return quizData.messages[getLevelKey()][currentLang];
+}
+
+function getShortResultSummary(levelKey) {
+  const shortMap = {
+    "zh-HK": {
+      perfect: "你對資料安全界線有很清晰的掌握。",
+      pass70: "你已掌握大部分重點，但仍有細節值得再留意。",
+      below70: "你需要重新建立資料安全界線意識。"
+    },
+    "zh-CN": {
+      perfect: "你对资料安全界线有很清晰的掌握。",
+      pass70: "你已掌握大部分重点，但仍有细节值得再留意。",
+      below70: "你需要重新建立资料安全界线意识。"
+    },
+    "en": {
+      perfect: "You have a very clear grasp of data safety boundaries.",
+      pass70: "You got most of the key ideas, but some details still need attention.",
+      below70: "You need to rebuild your awareness of data safety boundaries."
+    }
+  };
+  return shortMap[currentLang]?.[levelKey] || getEncouragementMessage();
 }
 
 function getBadgeImagePath(levelKey) {
@@ -127,8 +146,7 @@ function applyLanguageUI() {
 
 function updateSummary() {
   const score = getScore();
-  document.getElementById("summary").innerHTML =
-    `${getUIText("scoreLabel")}：${score} / ${quizData.questions.length}`;
+  document.getElementById("summary").innerHTML = `${getUIText("scoreLabel")}：${score} / ${quizData.questions.length}`;
 }
 
 function hideResult() {
@@ -150,7 +168,6 @@ function showResult(question, selectedIndexes) {
   const correct = isAnswerCorrect(question, selectedIndexes);
 
   resultBox.classList.remove("result-pop", "result-shake");
-
   const contentHtml = `
     ${correct ? getUIText("correctLabel") : getUIText("wrongLabel")}<br>
     ${question.explanation[currentLang]}
@@ -170,101 +187,10 @@ function showResult(question, selectedIndexes) {
   }
 }
 
-function buildLevelBadge(levelKey) {
-  const levelText = cleanLevelText(getLevelText(levelKey));
-  const badgePath = getBadgeImagePath(levelKey);
-  return `
-    <div class="level-badge">
-      <img class="level-badge-icon" src="${badgePath}" alt="${levelText}">
-      <span class="level-text">${getUIText("levelLabel")}：${levelText}</span>
-    </div>
-  `;
-}
-
-function renderShareSection(levelKey) {
-  return `
-    <div class="share-box">
-      <div class="share-title">${getUIText("shareTitle")}</div>
-      <div class="share-text">${getUIText("shareText")}</div>
-
-      <div class="share-card-preview">
-        ${buildShareCardHTML(levelKey)}
-      </div>
-
-      <div class="share-actions">
-        <button class="share-btn download" onclick="downloadShareCard()">🖼️ 下載成就卡</button>
-        <button class="share-btn secondary" onclick="systemShareCard()">📤 系統分享圖片</button>
-        <button class="share-btn whatsapp" onclick="shareWhatsApp()">🟢 WhatsApp</button>
-        <button class="share-btn facebook" onclick="shareFacebook()">🔵 Facebook</button>
-        <button class="share-btn instagram" onclick="shareInstagram()">🟣 Instagram</button>
-        <button class="share-btn secondary" onclick="copyQuizLink()">${getUIText("copyLink")}</button>
-      </div>
-
-      <div class="share-note">
-        提示：你而家可以先下載或系統分享「成就卡圖片」。WhatsApp / Facebook / Instagram 按鈕目前仍以分享連結為主；如要做到各平台從網頁直接貼圖分享，仍受平台和瀏覽器限制。
-      </div>
-
-      <div class="copy-msg" id="copyMsg">${getUIText("copied")}</div>
-      <div class="ig-hint" id="igHint" style="display:none;">📸 已複製小測驗連結！你可以去 Instagram 貼上分享，或先下載成就卡再發佈。</div>
-    </div>
-  `;
-}
-
-function buildShareCardHTML(levelKey) {
-  const badgePath = getBadgeImagePath(levelKey);
-  const levelText = cleanLevelText(getLevelText(levelKey));
-  const score = getScore();
-  const total = quizData.questions.length;
-
-  return `
-    <div class="share-card-inner" id="shareCardInner">
-      <div class="share-card-headline">${getUIText("badge")}</div>
-      <div class="share-card-title">${getUIText("siteTitle")}</div>
-
-      <div class="share-card-grid">
-        <div class="share-card-badge-wrap">
-          <img class="share-card-badge" src="${badgePath}" alt="${levelText}">
-        </div>
-
-        <div>
-          <div class="share-card-score">${getUIText("scoreLabel")}：<strong>${score}</strong> / ${total}</div>
-          <div class="share-card-level">
-            <img src="${badgePath}" alt="${levelText}">
-            <span>${levelText}</span>
-          </div>
-          <div class="share-card-message">${getEncouragementMessage()}</div>
-        </div>
-      </div>
-
-      <div class="share-card-footer">
-        <div class="share-card-chip">${getUIText("footer")}</div>
-        <div class="share-card-chip">${getShareUrl()}</div>
-      </div>
-    </div>
-  `;
-}
-
-function hideFinalResult() {
-  const box = document.getElementById("finalResult");
-  if (!box) return;
-
-  box.className = "result";
-  box.innerHTML = "";
-  box.style.display = "none";
-  showingFinal = false;
-}
-
 function copyQuizLink() {
   const url = getShareUrl();
-
   navigator.clipboard.writeText(url).then(() => {
-    const msg = document.getElementById("copyMsg");
-    if (msg) {
-      msg.classList.remove("show");
-      void msg.offsetWidth;
-      msg.classList.add("show");
-      setTimeout(() => msg.classList.remove("show"), 2500);
-    }
+    alert(getUIText("copied"));
   }).catch(() => {
     alert(url);
   });
@@ -285,31 +211,12 @@ function shareFacebook() {
 
 function shareInstagram() {
   const url = getShareUrl();
-
   navigator.clipboard.writeText(url).then(() => {
-    const msg = document.getElementById("copyMsg");
-    const igHint = document.getElementById("igHint");
-
-    if (msg) {
-      msg.classList.remove("show");
-      void msg.offsetWidth;
-      msg.classList.add("show");
-    }
-
-    if (igHint) {
-      igHint.style.display = "block";
-      setTimeout(() => {
-        igHint.style.display = "none";
-      }, 4000);
-    }
+    alert(currentLang === "en" ? "Link copied. You can paste it into Instagram." : "連結已複製，你可以到 Instagram 貼上分享。");
   }).catch(() => {
     alert(url);
   });
 }
-
-/* =========================
-   Canvas 生成分享圖：修正變形 / 溢出
-   ========================= */
 
 function waitImageLoaded(img) {
   return new Promise((resolve, reject) => {
@@ -369,18 +276,12 @@ function wrapTextByWords(ctx, text, maxWidth, maxLines = 4) {
       line = testLine;
     }
   }
-
   if (line) lines.push(line);
-
-  if (lines.length > maxLines) {
-    lines.length = maxLines;
-  }
 
   if (lines.length === maxLines) {
     lines[maxLines - 1] = truncateTextToWidth(ctx, lines[maxLines - 1], maxWidth);
   }
-
-  return lines;
+  return lines.slice(0, maxLines);
 }
 
 function wrapTextByChars(ctx, text, maxWidth, maxLines = 4) {
@@ -398,18 +299,12 @@ function wrapTextByChars(ctx, text, maxWidth, maxLines = 4) {
       line = testLine;
     }
   }
-
   if (line) lines.push(line);
-
-  if (lines.length > maxLines) {
-    lines.length = maxLines;
-  }
 
   if (lines.length === maxLines) {
     lines[maxLines - 1] = truncateTextToWidth(ctx, lines[maxLines - 1], maxWidth);
   }
-
-  return lines;
+  return lines.slice(0, maxLines);
 }
 
 function drawWrappedLines(ctx, lines, x, y, lineHeight) {
@@ -459,14 +354,12 @@ async function generateShareCardBlob() {
   canvas.height = 1350;
   const ctx = canvas.getContext("2d");
 
-  // 背景
   const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
   grad.addColorStop(0, "#fff8ec");
   grad.addColorStop(1, "#ffeed0");
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // 點點背景
   ctx.fillStyle = "rgba(255,213,79,0.22)";
   for (let y = 30; y < canvas.height; y += 32) {
     for (let x = 30; x < canvas.width; x += 32) {
@@ -476,7 +369,6 @@ async function generateShareCardBlob() {
     }
   }
 
-  // 主面板
   ctx.fillStyle = "#ffffff";
   drawRoundedRect(ctx, 54, 54, 972, 1242, 34);
   ctx.fill();
@@ -484,7 +376,6 @@ async function generateShareCardBlob() {
   ctx.strokeStyle = "#1f1f1f";
   ctx.stroke();
 
-  // 頂部標籤
   ctx.fillStyle = "#ffd54f";
   drawRoundedRect(ctx, 120, 104, 300, 72, 36);
   ctx.fill();
@@ -494,20 +385,15 @@ async function generateShareCardBlob() {
 
   ctx.fillStyle = "#1f1f1f";
   ctx.font = "bold 28px Arial";
-  const badgeLabel = truncateTextToWidth(ctx, getUIText("badge"), 240);
-  ctx.fillText(badgeLabel, 150, 150);
+  ctx.fillText(truncateTextToWidth(ctx, getUIText("badge"), 240), 150, 150);
 
-  // 大標題：自動縮小以適應寬度
   const title = getUIText("siteTitle");
   const isEnglish = currentLang === "en";
-  const titleBoxWidth = 840;
-  const picked = pickTitleFont(ctx, title, titleBoxWidth, isEnglish);
-
+  const picked = pickTitleFont(ctx, title, 840, isEnglish);
   ctx.fillStyle = "#1f1f1f";
   ctx.font = `bold ${picked.size}px Arial`;
   drawWrappedLines(ctx, picked.lines, 120, 250, picked.size + 12);
 
-  // badge 圖（等比例 contain，修正變形）
   const badgeImg = new Image();
   badgeImg.src = badgePath;
   await waitImageLoaded(badgeImg);
@@ -518,10 +404,8 @@ async function generateShareCardBlob() {
   ctx.lineWidth = 6;
   ctx.strokeStyle = "#1f1f1f";
   ctx.stroke();
-
   drawImageContain(ctx, badgeImg, 140, 445, 230, 230);
 
-  // 分數區
   ctx.fillStyle = "#ffffff";
   drawRoundedRect(ctx, 430, 410, 520, 300, 28);
   ctx.fill();
@@ -535,16 +419,13 @@ async function generateShareCardBlob() {
 
   const score = getScore();
   const total = quizData.questions.length;
-
   ctx.fillStyle = "#ff6b6b";
   ctx.font = "bold 88px Arial";
   ctx.fillText(String(score), 470, 580);
-
   ctx.fillStyle = "#1f1f1f";
   ctx.font = "bold 46px Arial";
   ctx.fillText(`/ ${total}`, 600, 577);
 
-  // 級別 pill
   const levelText = cleanLevelText(getLevelText(levelKey));
   ctx.fillStyle = "#fff7d0";
   drawRoundedRect(ctx, 465, 600, 430, 78, 39);
@@ -552,13 +433,10 @@ async function generateShareCardBlob() {
   ctx.lineWidth = 5;
   ctx.strokeStyle = "#1f1f1f";
   ctx.stroke();
-
   ctx.fillStyle = "#1f1f1f";
   ctx.font = "bold 30px Arial";
-  const safeLevelText = truncateTextToWidth(ctx, levelText, 360);
-  ctx.fillText(safeLevelText, 500, 648);
+  ctx.fillText(truncateTextToWidth(ctx, levelText, 360), 500, 648);
 
-  // 結果訊息區
   ctx.fillStyle = "#ffffff";
   drawRoundedRect(ctx, 110, 760, 840, 310, 24);
   ctx.fill();
@@ -569,16 +447,14 @@ async function generateShareCardBlob() {
   ctx.fillStyle = "#1f1f1f";
   ctx.font = "bold 34px Arial";
   ctx.fillText(getUIText("resultTitle"), 150, 825);
-
   ctx.font = "30px Arial";
+
   const message = getEncouragementMessage();
   const messageLines = isEnglish
     ? wrapTextByWords(ctx, message, 740, 5)
     : wrapTextByChars(ctx, message, 740, 5);
-
   drawWrappedLines(ctx, messageLines, 150, 885, 46);
 
-  // footer chips
   ctx.fillStyle = "#ffffff";
   drawRoundedRect(ctx, 110, 1130, 330, 64, 32);
   ctx.fill();
@@ -588,8 +464,7 @@ async function generateShareCardBlob() {
 
   ctx.fillStyle = "#1f1f1f";
   ctx.font = "bold 24px Arial";
-  const footerLabel = truncateTextToWidth(ctx, getUIText("footer"), 280);
-  ctx.fillText(footerLabel, 140, 1171);
+  ctx.fillText(truncateTextToWidth(ctx, getUIText("footer"), 280), 140, 1171);
 
   drawRoundedRect(ctx, 470, 1130, 460, 64, 32);
   ctx.fillStyle = "#ffffff";
@@ -600,8 +475,7 @@ async function generateShareCardBlob() {
 
   ctx.fillStyle = "#1f1f1f";
   ctx.font = "20px Arial";
-  const shortUrl = truncateTextToWidth(ctx, getShortShareUrlForCard(), 390);
-  ctx.fillText(shortUrl, 500, 1171);
+  ctx.fillText(truncateTextToWidth(ctx, getShortShareUrlForCard(), 390), 500, 1171);
 
   return await new Promise(resolve => canvas.toBlob(resolve, "image/png", 1.0));
 }
@@ -619,7 +493,7 @@ async function downloadShareCard() {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   } catch (error) {
     console.error(error);
-    alert("未能生成成就卡圖片，請稍後再試。");
+    alert(currentLang === "en" ? "Failed to generate share card image. Please try again later." : "未能生成成就卡圖片，請稍後再試。");
   }
 }
 
@@ -632,7 +506,7 @@ async function systemShareCard() {
       await navigator.share({
         files: [file],
         title: getShareTitle(),
-        text: getUIText("shareText")
+        text: getShortResultSummary(getLevelKey())
       });
     } else {
       await downloadShareCard();
@@ -643,43 +517,67 @@ async function systemShareCard() {
   }
 }
 
+async function oneClickShare() {
+  await systemShareCard();
+}
+
 function showFinalResult() {
   showingFinal = true;
   const card = document.getElementById("quizCard");
   card.classList.add("final-mode");
+  window.scrollTo({ top: 0, behavior: "smooth" });
 
   const finalBox = document.getElementById("finalResult");
   const score = getScore();
   const total = quizData.questions.length;
   const levelKey = getLevelKey();
   const badgePath = getBadgeImagePath(levelKey);
-  const cleanLevel = cleanLevelText(getLevelText(levelKey));
+  const levelText = cleanLevelText(getLevelText(levelKey));
+  const shortSummary = getShortResultSummary(levelKey);
 
   finalBox.innerHTML = `
     <div class="final-enter">
-      <h3 style="margin-top:0; font-size:24px;">🎉 ${getUIText("resultTitle")}</h3>
+      <div class="result-heading">🎉 ${getUIText("resultTitle")}</div>
 
-      <div class="result-hero">
-        <div class="result-badge-panel">
-          <img class="result-badge-img" src="${badgePath}" alt="${cleanLevel}">
+      <div class="result-hero-simple">
+        <div class="result-badge-core">
+          <img src="${badgePath}" alt="${levelText}">
         </div>
-        <div class="result-details">
-          <div class="result-score-line">${getUIText("scoreLabel")}：<span class="result-score-number">${score}</span> / ${total}</div>
-          ${buildLevelBadge(levelKey)}
-          <div class="encouragement-box">${getEncouragementMessage()}</div>
+
+        <div class="result-core-meta">
+          <div class="result-score-inline">${getUIText("scoreLabel")}：<span class="score-number">${score}</span> / ${total}</div>
+
+          <div class="result-level-pill">
+            <img src="${badgePath}" alt="${levelText}">
+            <span>${levelText}</span>
+          </div>
+
+          <div class="result-short-summary">${shortSummary}</div>
         </div>
       </div>
 
-      ${renderShareSection(levelKey)}
+      <div class="result-cta">
+        <button class="cta-btn cta-primary" onclick="oneClickShare()">📤 分享成就卡</button>
+        <button class="cta-btn cta-secondary" onclick="restartQuiz()">🔄 ${getUIText("restart")}</button>
+      </div>
+
+      <div class="result-more">
+        <details>
+          <summary>▽ 查看詳細解說與其他方式</summary>
+          <div class="result-detail-copy">${getEncouragementMessage()}</div>
+          <div class="result-secondary-actions">
+            <button class="secondary-btn share" onclick="oneClickShare()">📤 系統分享圖片</button>
+            <button class="secondary-btn download" onclick="downloadShareCard()">🖼️ 下載成就卡</button>
+            <button class="secondary-btn copy" onclick="copyQuizLink()">🔗 ${getUIText("copyLink")}</button>
+          </div>
+          <div class="result-helper-text">預設主按鈕會優先使用系統分享圖片；如果瀏覽器或裝置未支援，會自動改為下載成就卡。</div>
+        </details>
+      </div>
     </div>
   `;
 
   finalBox.className = "result info";
   finalBox.style.display = "block";
-
-  const nextBtn = document.getElementById("nextBtn");
-  nextBtn.innerText = getUIText("restart");
-  nextBtn.classList.remove("cta-glow");
 }
 
 function getOptionLetter(index) {
@@ -694,8 +592,7 @@ function renderPresentation(question) {
   if (question.presentation === "scenario" && question.story && question.story[currentLang]) {
     const story = question.story[currentLang];
 
-    document.getElementById("storyLabel").innerText =
-      story.label || getUIText("scenarioLabelDefault");
+    document.getElementById("storyLabel").innerText = story.label || getUIText("scenarioLabelDefault");
     document.getElementById("storyTitle").innerText = story.title || "";
 
     const storyContentBox = document.getElementById("storyContent");
@@ -724,10 +621,8 @@ function renderPresentation(question) {
 
         bubble.appendChild(speaker);
         bubble.appendChild(text);
-
         wrap.appendChild(avatar);
         wrap.appendChild(bubble);
-
         storyContentBox.appendChild(wrap);
       });
     } else if (Array.isArray(story.content)) {
@@ -750,7 +645,6 @@ function renderPresentation(question) {
 function animateQuestionArea() {
   const area = document.getElementById("questionArea");
   if (!area) return;
-
   area.classList.remove("content-anim");
   void area.offsetWidth;
   area.classList.add("content-anim");
@@ -761,7 +655,6 @@ function refreshOptionSelectionUI(question, state) {
 
   buttons.forEach((btn, i) => {
     btn.classList.remove("option-selected");
-
     if (state.selected.includes(i)) {
       btn.classList.add("option-selected");
     }
@@ -794,14 +687,10 @@ function renderQuestion() {
   renderPresentation(question);
 
   document.getElementById("questionType").innerHTML =
-    question.type === "multiple"
-      ? getUIText("multipleLabel")
-      : getUIText("singleLabel");
+    question.type === "multiple" ? getUIText("multipleLabel") : getUIText("singleLabel");
 
   document.getElementById("questionHint").innerHTML =
-    question.type === "multiple"
-      ? getUIText("multipleHint")
-      : getUIText("singleHint");
+    question.type === "multiple" ? getUIText("multipleHint") : getUIText("singleHint");
 
   let html = "";
   const correctIndexes = getCorrectIndexes(question);
@@ -862,7 +751,6 @@ function renderQuestion() {
 function selectOption(index) {
   const question = quizData.questions[current];
   const state = getQuestionState(question.id);
-
   if (state.submitted) return;
 
   if (question.type === "single") {
@@ -878,7 +766,6 @@ function selectOption(index) {
     } else {
       state.selected.push(index);
     }
-
     refreshOptionSelectionUI(question, state);
   }
 }
@@ -886,7 +773,6 @@ function selectOption(index) {
 function submitMultipleAnswer() {
   const question = quizData.questions[current];
   const state = getQuestionState(question.id);
-
   if (question.type !== "multiple") return;
 
   if (state.selected.length === 0) {
@@ -941,7 +827,6 @@ async function loadQuestions() {
 
     const urlLang = new URLSearchParams(window.location.search).get("lang");
     const supported = ["zh-HK", "zh-CN", "en"];
-
     if (supported.includes(urlLang)) {
       currentLang = urlLang;
     }
@@ -962,7 +847,6 @@ async function loadQuestions() {
 document.getElementById("langSelect").addEventListener("change", function () {
   currentLang = this.value;
   updateLanguageInUrl(currentLang);
-
   if (showingFinal) {
     applyLanguageUI();
     showFinalResult();
