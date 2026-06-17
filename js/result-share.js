@@ -16,12 +16,24 @@ function getShareInviteText() {
   const total = AppState.quizData.questions.length;
 
   const templates = {
-    "zh-HK": `我的評價是「${levelText}」 (${score}/${total})，你也一起來參與吧！`,
-    "zh-CN": `我的评价是「${levelText}」 (${score}/${total})，你也一起来参与吧！`,
-    "en": `My result is "${levelText}" (${score}/${total}). Come and give it a try too!`
+    "zh-HK": {
+      perfect: `我在這個資料安全大考驗拿到「${levelText}」(${score}/${total})！你也來挑戰一下，看看自己能不能拿滿分！`,
+      pass70: `我剛完成這個資料安全小測，結果是「${levelText}」(${score}/${total})。你也來試試，看你能拿到哪個級別！`,
+      below70: `我剛做完這個資料安全小測，原來有些細節比想像中更容易忽略。你也來試試，看自己屬於哪一級！`
+    },
+    "zh-CN": {
+      perfect: `我在这个资料安全大考验拿到「${levelText}」(${score}/${total})！你也来挑战一下，看看自己能不能拿满分！`,
+      pass70: `我刚完成这个资料安全小测，结果是「${levelText}」(${score}/${total})。你也来试试，看你能拿到哪个级别！`,
+      below70: `我刚做完这个资料安全小测，原来有些细节比想象中更容易忽略。你也来试试，看自己属于哪一级！`
+    },
+    "en": {
+      perfect: `I got "${levelText}" (${score}/${total}) in this data safety challenge! Come and see if you can get a perfect score too!`,
+      pass70: `I just completed this data safety quiz and got "${levelText}" (${score}/${total}). Give it a try and see which level you can reach!`,
+      below70: `I just tried this data safety quiz and found that some details are easier to overlook than expected. Give it a try and see which level you get!`
+    }
   };
 
-  return templates[AppState.currentLang] || templates["zh-HK"];
+  return templates[AppState.currentLang]?.[levelKey] || templates["zh-HK"][levelKey];
 }
 
 function waitImageLoaded(img) {
@@ -279,7 +291,6 @@ async function generateShareCardBlob() {
   const summaryLines = isEnglish
     ? wrapTextByWords(ctx, shortSummary, 740, 4)
     : wrapTextByChars(ctx, shortSummary, 740, 4);
-
   drawWrappedLines(ctx, summaryLines, 150, 910, 46);
 
   // URL box
@@ -362,7 +373,6 @@ async function shareImageAndUrl() {
 function hideFinalResult() {
   const box = document.getElementById("finalResult");
   if (!box) return;
-
   box.className = "result";
   box.innerHTML = "";
   box.style.display = "none";
