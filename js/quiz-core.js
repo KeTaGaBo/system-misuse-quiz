@@ -56,8 +56,8 @@ function isAnswerCorrect(question, selectedIndexes) {
 
 function getScore() {
   if (!AppState.quizData) return 0;
-
   let score = 0;
+
   AppState.quizData.questions.forEach(q => {
     const state = AppState.answersState[q.id];
     if (state && state.submitted && isAnswerCorrect(q, state.selected)) {
