@@ -12,6 +12,16 @@ function applyLanguageUI() {
   document.getElementById("langSelect").value = AppState.currentLang;
   document.getElementById("langLabel").innerText = ui.langLabel || "Language / 語言 / 语言";
   document.getElementById("checkBtn").innerText = ui.checkAnswer;
+
+  // 三語聲明切換
+  const disclaimerEls = document.querySelectorAll("#disclaimerNote .disclaimer-text");
+  disclaimerEls.forEach(el => {
+    if (el.dataset.lang === AppState.currentLang) {
+      el.classList.add("active");
+    } else {
+      el.classList.remove("active");
+    }
+  });
 }
 
 function updateSummary() {
