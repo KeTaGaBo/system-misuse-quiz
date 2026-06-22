@@ -6,10 +6,10 @@
   <title>Quiz</title>
 
   <!-- CSS：位於 misuse_202606/css/ -->
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/quiz.css">
-  <link rel="stylesheet" href="css/result.css">
-  <link rel="stylesheet" href="css/share-card.css">
+  css/base.css
+  css/quiz.css
+  css/result.css
+  css/share-card.css
 </head>
 <body>
   <div class="card" id="quizCard">
@@ -32,9 +32,17 @@
     <h1 id="siteTitle"></h1>
     <div class="intro" id="intro"></div>
 
-    <!-- 新增：聲明 -->
-    <div class="disclaimer-note">
-      本測驗為資訊安全與合規教育用途之模擬情境，並不涉及任何特定真實人物、機構或個案。
+    <!-- 三語聲明 -->
+    <div class="disclaimer-note" id="disclaimerNote">
+      <span class="disclaimer-text" data-lang="zh-HK">
+        本測驗為資訊安全與合規教育用途之模擬情境，並不涉及任何特定真實人物、機構或個案。
+      </span>
+      <span class="disclaimer-text" data-lang="zh-CN">
+        本测验为信息安全与合规教育用途之模拟情境，并不涉及任何特定真实人物、机构或个案。
+      </span>
+      <span class="disclaimer-text" data-lang="en">
+        This quiz is a simulated scenario for cybersecurity and compliance education only, and does not refer to any specific real person, organization, or case.
+      </span>
     </div>
 
     <div id="questionArea">
@@ -70,9 +78,9 @@
   </div>
 
   <!-- JS：位於網站根目錄 /js/ -->
-  <script src="/js/quiz-core.js"></script>
-  <script src="/js/quiz-render.js"></script>
-  <script src="/js/result-share.js"></script>
-  <script src="/js/main.js"></script>
+  /js/quiz-core.jsscript>
+  /js/quiz-render.jsscript>
+  /js/result-share.jsscript>
+  /js/main.jsscript>
 </body>
 </html>
