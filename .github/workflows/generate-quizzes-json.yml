@@ -32,7 +32,6 @@ jobs:
           import re
           import subprocess
           from pathlib import Path
-          from datetime import datetime
 
           root = Path(".")
           pattern = re.compile(r"^[a-z0-9-]+_\d{6}$")
@@ -52,12 +51,9 @@ jobs:
                           "display": ""
                       }
 
-                  # display 版只取日期（YYYY-MM-DD）
-                  display = result[:10]
-
                   return {
                       "iso": result,
-                      "display": display
+                      "display": result[:7]
                   }
               except Exception:
                   return {
