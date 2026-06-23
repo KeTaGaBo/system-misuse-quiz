@@ -1,0 +1,103 @@
+name: Auto Generate quizzes.json
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '*/questions.json'
+      - '*/index.html'
+      - '.github/workflows/generate-quizzes-json.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-quizzes-json:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate quizzes.json
+        shell: bash
+        run: |
+          python3 <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          root = Path(".")
+          pattern = re.compile(r"^[a-z0-9-]+_\d{6}$")
+
+          quizzes = []
+
+          for folder in sorted(root.iterdir()):
+              if not folder.is_dir():
+                  continue
+              if not pattern.match(folder.name):
+                  continue
+
+              questions_file = folder / "questions.json"
+              index_file = folder / "index.html"
+
+              if not questions_file.exists() or not index_file.exists():
+                  continue
+
+              try:
+                  data = json.loads(questions_file.read_text(encoding="utf-8"))
+              except Exception as e:
+                  print(f"Skip {folder.name}: failed to parse questions.json -> {e}")
+                  continue
+
+              ui = data.get("ui", {})
+
+              def pick(lang, key, fallback=""):
+                  return ui.get(lang, {}).get(key, fallback)
+
+              quiz_entry = {
+                  "id": folder.name,
+                  "title": {
+                      "zh-HK": pick("zh-HK", "siteTitle", folder.name),
+                      "zh-CN": pick("zh-CN", "siteTitle", folder.name),
+                      "en": pick("en", "siteTitle", folder.name)
+                  },
+                  "description": {
+                      "zh-HK": pick("zh-HK", "heroSubtitle", ""),
+                      "zh-CN": pick("zh-CN", "heroSubtitle", ""),
+                      "en": pick("en", "heroSubtitle", "")
+                  },
+                  "path": f"/{folder.name}/",
+                  "status": "active"
+              }
+
+              quizzes.append(quiz_entry)
+
+          output = Path("quizzes.json")
+          output.write_text(
+              json.dumps(quizzes, ensure_ascii=False, indent=2),
+              encoding="utf-8"
+          )
+
+          print("Generated quizzes.json with", len(quizzes), "entries")
+          PY
+
+      - name: Show generated file
+        run: cat quizzes.json
+
+      - name: Commit and push if changed
+        shell: bash
+        run: |
+          if git diff --quiet -- quizzes.json; then
+            echo "No changes in quizzes.json"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add quizzes.json
+          git commit -m "chore: auto-generate quizzes.json"
+          git push
