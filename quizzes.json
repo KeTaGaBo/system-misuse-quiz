@@ -1,0 +1,17 @@
+[
+  {
+    "id": "misuse_202606",
+    "title": {
+      "zh-HK": "一念之差：資安及私隱問答挑戰",
+      "zh-CN": "一念之差：信息安全与隐私问答挑战",
+      "en": "A Split-Second Choice: Cybersecurity & Privacy Challenge"
+    },
+    "description": {
+      "zh-HK": "探討日常工作中容易忽略的資料使用風險。",
+      "zh-CN": "探讨日常工作中容易忽略的数据使用风险。",
+      "en": "Explore common data misuse risks in everyday work scenarios."
+    },
+    "path": "/misuse_202606/",
+    "status": "active"
+  }
+]
