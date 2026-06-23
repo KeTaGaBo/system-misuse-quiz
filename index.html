@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-HK">
 <head>
-  <!-- HUB_FIXED_20260623_v4 -->
+  <!-- HUB_FIXED_20260623_v5 -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BOKSS Awareness Hub</title>
@@ -182,7 +182,7 @@
         const langParam = encodeURIComponent(currentLang);
         const targetUrl = `${q.path}?lang=${langParam}`;
 
-        card.innerHTML = `
+        const cardHtml = `
           <div class="quiz-status">${t.active}</div>
 
           <a class="quiz-title-link" href="${targetUrltle">${title}</div>
@@ -200,6 +200,7 @@
           </div>
         `;
 
+        card.innerHTML = cardHtml;
         list.appendChild(card);
       });
     }
