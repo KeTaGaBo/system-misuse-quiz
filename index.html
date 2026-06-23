@@ -3,86 +3,209 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Awareness Hub</title>
-
-  <style>
-    body {
-      font-family: Arial;
-      background: #fff8ec;
-      padding: 20px;
-      color: #1f1f1f;
-    }
-
-    h1 {
-      margin-bottom: 10px;
-    }
-
-    .quiz-list {
-      margin-top: 20px;
-    }
-
-    .quiz-card {
-      border: 2px solid #1f1f1f;
-      padding: 16px;
-      margin-bottom: 16px;
-      border-radius: 12px;
-      background: white;
-      box-shadow: 4px 4px 0 #1f1f1f;
-    }
-
-    .quiz-title {
-      font-weight: bold;
-      font-size: 18px;
-      margin-bottom: 6px;
-    }
-
-    .quiz-desc {
-      color: #555;
-      margin-bottom: 10px;
-    }
-
-    .start-btn {
-      display: inline-block;
-      background: #ff6b6b;
-      color: white;
-      padding: 8px 12px;
-      text-decoration: none;
-      border-radius: 8px;
-      border: 2px solid #1f1f1f;
-    }
-  </style>
+  <title>BOKSS Awareness Hub</title>
+  <meta name="description" content="BOKSS Awareness Hub - 資安與私隱教育測驗目錄">
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
+  <div class="page">
+    <div class="hero">
+      <div class="topbar">
+        <div>
+          <div class="badge" id="hubBadge">BOKSS Awareness Hub</div>
+        </div>
 
-<h1>🎯 Awareness Hub</h1>
-<div>請選擇一個測驗開始：</div>
+        <div class="lang-box">
+          <div class="lang-label" id="langLabel">Language / 語言 / 语言</div>
+          <select id="langSelect">
+            <option value="zh-HK">繁體中文</option>
+            <option value="zh-CN">简体中文</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+      </div>
 
-<div class="quiz-list" id="quizList"></div>
+      <div class="subtitle" id="hubSubtitle">資安與私隱學習目錄</div>
+      <h1 id="hubTitle">請選擇一個測驗開始</h1>
+      <div class="intro" id="hubIntro">
+        這裡集合了不同主題的資安及私隱教育測驗。你可按需要選擇合適的測驗開始，並持續留意最新更新。
+      </div>
+    </div>
 
-<script>
-async function loadQuizzes() {
-  const res = await fetch('/quizzes.json');
-  const data = await res.json();
+    <div id="quizList" class="quiz-list">
+      <div class="loading-box" id="loadingBox">載入中...</div>
+    </div>
 
-  const container = document.getElementById('quizList');
+    <div class="footer" id="hubFooter">
+      BOKSS Awareness Hub
+    </div>
+  </div>
 
-  data.forEach(q => {
-    if (q.status !== 'active') return;
+  <script>
+    const hubText = {
+      "zh-HK": {
+        badge: "BOKSS Awareness Hub",
+        subtitle: "資安與私隱學習目錄",
+        title: "請選擇一個測驗開始",
+        intro: "這裡集合了不同主題的資安及私隱教育測驗。你可按需要選擇合適的測驗開始，並持續留意最新更新。",
+        footer: "BOKSS Awareness Hub",
+        start: "開始測驗",
+        updated: "更新至",
+        active: "進行中",
+        empty: "目前尚未有可顯示的測驗。",
+        loading: "載入中...",
+        loadError: "未能載入測驗目錄。"
+      },
+      "zh-CN": {
+        badge: "BOKSS Awareness Hub",
+        subtitle: "信息安全与隐私学习目录",
+        title: "请选择一个测验开始",
+        intro: "这里集合了不同主题的信息安全与隐私教育测验。你可按需要选择合适的测验开始，并持续留意最新更新。",
+        footer: "BOKSS Awareness Hub",
+        start: "开始测验",
+        updated: "更新至",
+        active: "进行中",
+        empty: "目前尚未有可显示的测验。",
+        loading: "加载中...",
+        loadError: "未能加载测验目录。"
+      },
+      "en": {
+        badge: "BOKSS Awareness Hub",
+        subtitle: "Cybersecurity & Privacy Learning Directory",
+        title: "Choose a quiz to begin",
+        intro: "This hub brings together different cybersecurity and privacy awareness quizzes. Pick a quiz to start and keep an eye on the latest updates.",
+        footer: "BOKSS Awareness Hub",
+        start: "Start Quiz",
+        updated: "Updated",
+        active: "Active",
+        empty: "No quizzes are available at the moment.",
+        loading: "Loading...",
+        loadError: "Unable to load quiz directory."
+      }
+    };
 
-    const card = document.createElement('div');
-    card.className = 'quiz-card';
+    let currentLang = "zh-HK";
 
-    card.innerHTML = `
-      <div class="quiz-title">${q.title['zh-HK']}</div>
-      <div class="quiz-desc">${q.description['zh-HK']}</div>
-      <a class="start-btn" href="${q.path}?lang=zh-HKner.appendChild(card);
-  });
-}
+    function updateLanguageInUrl(lang) {
+      const url = new URL(window.location);
+      url.searchParams.set("lang", lang);
+      window.history.replaceState({}, "", url);
+    }
 
-loadQuizzes();
-</script>
+    function getLangText(obj) {
+      if (!obj) return "";
+      return obj[currentLang] || obj["zh-HK"] || obj["en"] || "";
+    }
 
+    function formatYearMonth(lastModified) {
+      if (!lastModified) return "";
+
+      if (typeof lastModified === "string") {
+        return lastModified.slice(0, 7);
+      }
+
+      if (typeof lastModified === "object") {
+        if (lastModified.display) {
+          return String(lastModified.display).slice(0, 7);
+        }
+        if (lastModified.iso) {
+          return String(lastModified.iso).slice(0, 7);
+        }
+      }
+
+      return "";
+    }
+
+    function updateHubLanguageUI() {
+      const t = hubText[currentLang];
+      document.documentElement.lang = currentLang;
+      document.title = t.badge;
+      document.getElementById("hubBadge").innerText = t.badge;
+      document.getElementById("hubSubtitle").innerText = t.subtitle;
+      document.getElementById("hubTitle").innerText = t.title;
+      document.getElementById("hubIntro").innerText = t.intro;
+      document.getElementById("hubFooter").innerText = t.footer;
+      document.getElementById("langSelect").value = currentLang;
+
+      const loadingBox = document.getElementById("loadingBox");
+      if (loadingBox) {
+        loadingBox.innerText = t.loading;
+      }
+    }
+
+    function sortQuizzes(quizzes) {
+      return [...quizzes].sort((a, b) => {
+        const aIso = (a.lastModified && (a.lastModified.iso || a.lastModified.display || a.lastModified)) || "";
+        const bIso = (b.lastModified && (b.lastModified.iso || b.lastModified.display || b.lastModified)) || "";
+        return String(bIso).localeCompare(String(aIso));
+      });
+    }
+
+    function renderQuizzes(quizzes) {
+      const list = document.getElementById("quizList");
+      const t = hubText[currentLang];
+      list.innerHTML = "";
+
+      const activeQuizzes = sortQuizzes(quizzes).filter(q => q.status === "active");
+
+      if (!activeQuizzes.length) {
+        const emptyBox = document.createElement("div");
+        emptyBox.className = "empty-box";
+        emptyBox.innerText = t.empty;
+        list.appendChild(emptyBox);
+        return;
+      }
+
+      activeQuizzes.forEach(q => {
+        const card = document.createElement("div");
+        card.className = "quiz-card";
+
+        const title = getLangText(q.title);
+        const desc = getLangText(q.description);
+        const lastModified = formatYearMonth(q.lastModified);
+        const langParam = encodeURIComponent(currentLang);
+
+        card.innerHTML = `
+          <div class="quiz-status">${t.active}</div>
+          <div class="quiz-title">${title}</div>
+          <div class="quiz-desc">${desc}</div>
+          <div class="quiz-meta">${t.updated}：${lastModified || "-"}</div>
+          <div class="quiz-actions">
+            <a class="start-btn" href="${q.path}?lang=${langParam}div>
+        `;
+
+        list.appendChild(card);
+      });
+    }
+
+    async function loadQuizzes() {
+      try {
+        const res = await fetch("/quizzes.json");
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        renderQuizzes(data);
+      } catch (error) {
+        const list = document.getElementById("quizList");
+        list.innerHTML = `<div class="error-box">${hubText[currentLang].loadError}</div>`;
+        console.error(error);
+      }
+    }
+
+    document.getElementById("langSelect").addEventListener("change", function () {
+      currentLang = this.value;
+      updateLanguageInUrl(currentLang);
+      updateHubLanguageUI();
+      loadQuizzes();
+    });
+
+    const urlLang = new URLSearchParams(window.location.search).get("lang");
+    const supported = ["zh-HK", "zh-CN", "en"];
+    if (supported.includes(urlLang)) {
+      currentLang = urlLang;
+    }
+
+    updateHubLanguageUI();
+    loadQuizzes();
+  </script>
 </body>
 </html>
-``
